@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Flow.Launcher.Plugin" Version="5.2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Update="FlowySettings.xaml">
+			<Generator>MSBuild:Compile</Generator>
+			<XamlRuntime>Wpf</XamlRuntime>
+		</Page>
+		<Compile Update="FlowySettings.xaml.cs">
+			<DependentUpon>FlowySettings.xaml</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="plugin.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Images\app.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Images\Flowy-Icon-a01-512.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Images\Flowy-Icon-b01-512.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="taskkill /f /im Flow.Launcher.exe" IgnoreExitCode="true" />
+	</Target>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;D:\d_apps\FlowLauncher\app-2.0.1\Plugins\Flowy\&quot; /Y /I /E" />
+	</Target>
+
+</Project>

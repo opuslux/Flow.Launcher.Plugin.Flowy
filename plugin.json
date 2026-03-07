@@ -1,0 +1,12 @@
+{
+  "ID": "f1043370-1337-4242-8c9d-0e1f2a3b4c5d",
+  "ActionKeyword": "*",
+  "Name": "Flowy",
+  "Description": "Custom catalog indexer like Launchy.",
+  "Author": "OpusLux",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/opuslux",
+  "ExecuteFileName": "Flow.Launcher.Plugin.Flowy.dll",
+  "IcoPath": "Images\\app.png"
+}
