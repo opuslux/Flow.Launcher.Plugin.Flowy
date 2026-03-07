@@ -161,7 +161,7 @@ namespace Flow.Launcher.Plugin.Flowy
             catch { }
         }
 
-        private void SaveCache()
+        public void SaveCache()
         {
             try
             {
