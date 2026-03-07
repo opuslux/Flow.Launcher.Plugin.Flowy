@@ -3,16 +3,16 @@
       run: |
         # 1. Tag holen (z.B. v1.0.1-alpha oder v.1.0.1-alpha)
         $tag = "${{ github.ref_name }}"
-        
+
         # 2. 'v' oder 'v.' am Anfang entfernen -> 1.0.1-alpha
         $fullVersion = $tag -replace '^v\.?', ''
-        
+
         # 3. Nur die reinen Zahlen extrahieren (Regex-Magie) -> 1.0.1
         $numericVersion = "1.0.0"
         if ($fullVersion -match '^(\d+\.\d+\.\d+(?:\.\d+)?)') {
             $numericVersion = $Matches[1]
         }
-        
+
         # 4. Variablen für GitHub Actions speichern
         echo "FULL_VERSION=$fullVersion" >> $env:GITHUB_ENV
         echo "NUMERIC_VERSION=$numericVersion" >> $env:GITHUB_ENV
