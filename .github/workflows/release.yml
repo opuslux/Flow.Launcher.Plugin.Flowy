@@ -37,11 +37,11 @@ jobs:
         $json = Get-Content plugin.json -Raw | ConvertFrom-Json
         $json.Version = "${{ env.FULL_VERSION }}"
         $json | ConvertTo-Json -Depth 10 | Set-Content plugin.json
-
+   
     - name: Build Project
       run: dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=${{ env.NUMERIC_VERSION }} -p:FileVersion=${{ env.NUMERIC_VERSION }}
 
-	- name: Prepare Release Folder
+    - name: Prepare Release Folder
       shell: pwsh
       run: |
         mkdir ReleaseFiles
