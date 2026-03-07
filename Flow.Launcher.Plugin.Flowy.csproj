@@ -9,6 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include=".github\workflows\release.yml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Flow.Launcher.Plugin" Version="5.2.0" />
 	</ItemGroup>
 
