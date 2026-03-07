@@ -39,7 +39,8 @@ jobs:
         $json | ConvertTo-Json -Depth 10 | Set-Content plugin.json
    
     - name: Build Project
-      run: dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=${{ env.NUMERIC_VERSION }} -p:FileVersion=${{ env.NUMERIC_VERSION }}
+      run: |
+        dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=1.0.0.0 -p:FileVersion=${{ env.NUMERIC_VERSION }}
 
     - name: Prepare Release Folder
       shell: pwsh
