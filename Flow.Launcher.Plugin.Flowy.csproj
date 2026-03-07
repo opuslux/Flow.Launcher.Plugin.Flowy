@@ -6,15 +6,11 @@
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include=".github\workflows\release.yml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Flow.Launcher.Plugin" Version="5.2.0" />
+		<PackageReference Include="Flow.Launcher.Plugin" Version="2.0.1" ExcludeAssets="runtime" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -31,24 +27,23 @@
 		<None Update="plugin.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="Images\*.png">
+
+		<None Update="Images\app.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+
+		<None Update="Images\Flowy-Icon-a01-512.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\Flowy-Icon-b01-512.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+
+		<None Update="README.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Images\app.png">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Images\Flowy-Icon-a01-512.png">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Images\Flowy-Icon-b01-512.png">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </None>
-	  <None Update="README.md">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
+		<None Include=".github\workflows\release.yml" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(GITHUB_ACTIONS)' != 'true'">
