@@ -41,13 +41,14 @@ jobs:
     - name: Build Project
       run: dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=${{ env.NUMERIC_VERSION }} -p:FileVersion=${{ env.NUMERIC_VERSION }}
 
-    - name: Prepare Release Folder
+	- name: Prepare Release Folder
       shell: pwsh
       run: |
         mkdir ReleaseFiles
         Copy-Item -Path "bin\Release\net9.0-windows\*.dll" -Destination "ReleaseFiles" -Recurse
         Copy-Item -Path "plugin.json" -Destination "ReleaseFiles"
-        Copy-Item -Path "Images" -Destination "ReleaseFiles" -Recurse
+        mkdir "ReleaseFiles\Images"
+        Copy-Item -Path "Images\app.png" -Destination "ReleaseFiles\Images"
         Copy-Item -Path "README.md" -Destination "ReleaseFiles" -ErrorAction SilentlyContinue
 
     - name: Create Zip Archive
