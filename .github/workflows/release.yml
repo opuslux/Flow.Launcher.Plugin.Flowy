@@ -1,0 +1,46 @@
+name: Build and Release Flowy
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggert automatisch, sobald du einen Tag wie "v1.0.1" erstellst
+  workflow_dispatch: # Erlaubt dir, den Build auch jederzeit manuell per Knopfdruck zu starten
+
+jobs:
+  build:
+    runs-on: windows-latest # Flowy ist WPF, also brauchen wir einen Windows-Server
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 9.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Build Project
+      run: dotnet build -c Release
+
+    - name: Prepare Release Folder
+      shell: pwsh
+      run: |
+        # Sammelt alle benötigten Dateien in einem temporären Ordner
+        mkdir ReleaseFiles
+        Copy-Item -Path "bin\Release\net9.0-windows\*.dll" -Destination "ReleaseFiles" -Recurse
+        Copy-Item -Path "plugin.json" -Destination "ReleaseFiles"
+        Copy-Item -Path "Images" -Destination "ReleaseFiles" -Recurse
+        Copy-Item -Path "README.md" -Destination "ReleaseFiles" -ErrorAction SilentlyContinue
+
+    - name: Create Zip Archive
+      shell: pwsh
+      run: |
+        # Zippt den Ordner exakt so, wie Flow Launcher es erwartet
+        Compress-Archive -Path "ReleaseFiles\*" -DestinationPath "Flow.Launcher.Plugin.Flowy.zip"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: Flow.Launcher.Plugin.Flowy.zip
+        generate_release_notes: true
