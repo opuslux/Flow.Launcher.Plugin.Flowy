@@ -51,11 +51,10 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(GITHUB_ACTIONS)' != 'true'">
-		<Exec Command="taskkill /f /im Flow.Launcher.exe" IgnoreExitCode="true" />
-	</Target>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Message Importance="high" Text="Starte lokales Deployment..." />
+		<Exec Command="taskkill /f /im Flow.Launcher.exe /t || exit 0" />
 		<Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;D:\d_apps\FlowLauncher\app-2.0.1\Plugins\Flowy\&quot; /Y /I /E" />
+		<Message Importance="high" Text="Lokales Deployment abgeschlossen." />
 	</Target>
 
 </Project>

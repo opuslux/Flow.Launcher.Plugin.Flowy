@@ -45,10 +45,15 @@ jobs:
       shell: pwsh
       run: |
         mkdir ReleaseFiles
+        # Kopiert DLLs UND XAML Dateien (wichtig für die Settings!)
         Copy-Item -Path "bin\Release\net9.0-windows\*.dll" -Destination "ReleaseFiles" -Recurse
+        Copy-Item -Path "bin\Release\net9.0-windows\*.xaml" -Destination "ReleaseFiles" -Recurse
+        
         Copy-Item -Path "plugin.json" -Destination "ReleaseFiles"
+        
         mkdir "ReleaseFiles\Images"
         Copy-Item -Path "Images\app.png" -Destination "ReleaseFiles\Images"
+        
         Copy-Item -Path "README.md" -Destination "ReleaseFiles" -ErrorAction SilentlyContinue
 
     - name: Create Zip Archive
