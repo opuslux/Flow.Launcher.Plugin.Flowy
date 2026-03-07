@@ -1,0 +1,30 @@
+- name: Extract and Parse Version
+      shell: pwsh
+      run: |
+        # 1. Tag holen (z.B. v1.0.1-alpha oder v.1.0.1-alpha)
+        $tag = "${{ github.ref_name }}"
+        
+        # 2. 'v' oder 'v.' am Anfang entfernen -> 1.0.1-alpha
+        $fullVersion = $tag -replace '^v\.?', ''
+        
+        # 3. Nur die reinen Zahlen extrahieren (Regex-Magie) -> 1.0.1
+        $numericVersion = "1.0.0"
+        if ($fullVersion -match '^(\d+\.\d+\.\d+(?:\.\d+)?)') {
+            $numericVersion = $Matches[1]
+        }
+        
+        # 4. Variablen für GitHub Actions speichern
+        echo "FULL_VERSION=$fullVersion" >> $env:GITHUB_ENV
+        echo "NUMERIC_VERSION=$numericVersion" >> $env:GITHUB_ENV
+
+    - name: Inject Version into plugin.json
+      shell: pwsh
+      run: |
+        # Liest die plugin.json, überschreibt die Version mit z.B. 1.0.1-alpha und speichert sie wieder
+        $json = Get-Content plugin.json -Raw | ConvertFrom-Json
+        $json.Version = "${{ env.FULL_VERSION }}"
+        $json | ConvertTo-Json -Depth 10 | Set-Content plugin.json
+
+    - name: Build Project
+      # FULL_VERSION für das Info-Feld, NUMERIC_VERSION für die strengen Windows-Datei-Metadaten
+      run: dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=${{ env.NUMERIC_VERSION }} -p:FileVersion=${{ env.NUMERIC_VERSION }}

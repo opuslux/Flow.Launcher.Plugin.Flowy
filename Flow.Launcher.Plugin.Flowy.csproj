@@ -41,6 +41,9 @@
 	  <None Update="Images\Flowy-Icon-b01-512.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
+	  <None Update="README.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
