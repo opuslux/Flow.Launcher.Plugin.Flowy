@@ -82,6 +82,7 @@
 
                             <Grid Grid.Row="0" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="70"/>
                                     <ColumnDefinition Width="130"/>
@@ -89,14 +90,17 @@
                                     <ColumnDefinition Width="35"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="C:\Folder\Path"/>
-                                <TextBox Text="{Binding DepthDisplay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Depth"/>
+                                <TextBlock Text="{Binding Index}" Grid.Column="0" VerticalAlignment="Center" Foreground="Gray" FontWeight="Bold" Margin="0,0,5,0"/>
 
-                                <TextBox Text="{Binding FileTypesDisplay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="2" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="*.lnk; *.pdf"/>
+                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="C:\Folder\Path"/>
 
-                                <CheckBox IsChecked="{Binding IncludeDirectories, UpdateSourceTrigger=PropertyChanged}" Content="Folders" Grid.Column="3" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding DepthDisplay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="2" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Depth"/>
 
-                                <Button Content="✕" Grid.Column="4" Click="RemoveRow_Click" ToolTip="Remove folder" 
+                                <TextBox Text="{Binding FileTypesDisplay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Margin="0,0,10,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="*.lnk; *.pdf"/>
+
+                                <CheckBox IsChecked="{Binding IncludeDirectories, UpdateSourceTrigger=PropertyChanged}" Content="Folders" Grid.Column="4" VerticalAlignment="Center"/>
+
+                                <Button Content="✕" Grid.Column="5" Click="RemoveRow_Click" ToolTip="Remove folder" 
                                         Background="Transparent" BorderThickness="0" Cursor="Hand" 
                                         Foreground="#CC5555" FontSize="16" FontWeight="Bold" 
                                         HorizontalAlignment="Right" VerticalAlignment="Center" Padding="5,0"/>

@@ -54,9 +54,10 @@ namespace Flow.Launcher.Plugin.Flowy
 
             lock (_catalogLock)
             {
-                foreach (var path in _indexer.Catalog)
+                // WICHTIG: Wir iterieren jetzt über IndexedItem Objekte
+                foreach (var item in _indexer.Catalog)
                 {
-                    string fileNameWithExt = Path.GetFileName(path);
+                    string fileNameWithExt = Path.GetFileName(item.Path);
                     var matchResult = _context.API.FuzzySearch(query.Search, fileNameWithExt);
 
                     if (matchResult.Score > 0)
@@ -64,13 +65,15 @@ namespace Flow.Launcher.Plugin.Flowy
                         results.Add(new Result
                         {
                             Title = fileNameWithExt,
-                            SubTitle = Path.GetDirectoryName(path),
-                            IcoPath = path,
+                            // Zeigt die Regel-Nummer im Untertitel an
+                            SubTitle = $"#{item.RuleIndex} | {Path.GetDirectoryName(item.Path)}",
+                            IcoPath = item.Path,
                             Score = matchResult.Score,
                             Action = _ => {
                                 try
                                 {
-                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+                                    // WICHTIG: Hier muss item.Path stehen, nicht mehr nur path!
+                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(item.Path) { UseShellExecute = true });
                                 }
                                 catch (Exception ex)
                                 {
@@ -83,7 +86,7 @@ namespace Flow.Launcher.Plugin.Flowy
                 }
             }
 
-            return results.OrderByDescending(r => r.Score).ToList();
+            return results.OrderByDescending(r => r.Score).Take(1000).ToList();
         }
 
         public Control CreateSettingPanel()
@@ -121,7 +124,6 @@ namespace Flow.Launcher.Plugin.Flowy
             StartRescanTimer();
         }
 
-        // NEU: Import-Methode für die Settings-UI
         public void ImportDirectories(List<CatalogDirectory> importedDirs)
         {
             _settings.Directories.Clear();
@@ -139,13 +141,18 @@ namespace Flow.Launcher.Plugin.Flowy
             try
             {
                 string json = File.ReadAllText(_cachePath);
-                var cachedCatalog = JsonSerializer.Deserialize<List<string>>(json);
+                // WICHTIG: Deserialisiert jetzt die neue Objekt-Struktur
+                var cachedCatalog = JsonSerializer.Deserialize<List<IndexedItem>>(json);
                 if (cachedCatalog != null)
                 {
                     lock (_catalogLock) _indexer.Catalog = cachedCatalog;
                 }
             }
-            catch { }
+            catch
+            {
+                // Falls der alte Cache (List<string>) nicht geladen werden kann, 
+                // einfach ignorieren, der Scan baut ihn neu auf.
+            }
         }
 
         public void SaveCache()

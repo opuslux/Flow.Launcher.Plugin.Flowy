@@ -5,22 +5,32 @@ using System.Linq;
 
 namespace Flow.Launcher.Plugin.Flowy
 {
+    // NEU: Container für Pfad + Info zur Regel
+    public class IndexedItem
+    {
+        public string Path { get; set; }
+        public int RuleIndex { get; set; }
+    }
+
     public class Indexer
     {
-        // Ein interner Lock, damit niemals zwei Scans gleichzeitig laufen
         private readonly object _scanLock = new object();
 
-        public List<string> Catalog { get; set; } = new List<string>();
+        // GEÄNDERT: Liste von Objekten statt Strings
+        public List<IndexedItem> Catalog { get; set; } = new List<IndexedItem>();
 
         public void BuildIndex(IEnumerable<CatalogDirectory> directories)
         {
-            // Verhindert, dass zwei Hintergrund-Tasks gleichzeitig scannen
             lock (_scanLock)
             {
-                var newCatalog = new List<string>();
+                var newCatalog = new List<IndexedItem>();
+                int currentRule = 1;
 
                 foreach (var dirConfig in directories)
                 {
+                    // NEU: Wir setzen die Nummer für die UI-Anzeige
+                    dirConfig.Index = currentRule;
+
                     string expandedPath = Environment.ExpandEnvironmentVariables(dirConfig.Path);
 
                     if (Directory.Exists(expandedPath))
@@ -28,14 +38,13 @@ namespace Flow.Launcher.Plugin.Flowy
                         int fileCount = 0;
                         int folderCount = 0;
 
-                        // Wir erstellen ein Set für schnellere Dateityp-Prüfung
                         var allowedExtensions = new HashSet<string>(
                             dirConfig.FileTypes.Select(t => t.TrimStart('*').ToLower())
                         );
 
-                        ScanDirectory(expandedPath, dirConfig, 0, newCatalog, ref fileCount, ref folderCount, allowedExtensions);
+                        // Wir geben die aktuelle Regel-Nummer an den Scan weiter
+                        ScanDirectory(expandedPath, dirConfig, 0, newCatalog, ref fileCount, ref folderCount, allowedExtensions, currentRule);
 
-                        // Erst am Ende des Verzeichnis-Scans die Werte setzen
                         dirConfig.FileCount = fileCount;
                         dirConfig.FolderCount = folderCount;
                     }
@@ -44,49 +53,41 @@ namespace Flow.Launcher.Plugin.Flowy
                         dirConfig.FileCount = 0;
                         dirConfig.FolderCount = 0;
                     }
+                    currentRule++;
                 }
 
-                // Referenz-Swap: Der Katalog ist ab jetzt sofort für die Query verfügbar
                 Catalog = newCatalog;
             }
         }
 
-        private void ScanDirectory(string currentPath, CatalogDirectory config, int currentDepth, List<string> results, ref int fileCount, ref int folderCount, HashSet<string> allowedExts)
+        private void ScanDirectory(string currentPath, CatalogDirectory config, int currentDepth, List<IndexedItem> results, ref int fileCount, ref int folderCount, HashSet<string> allowedExts, int ruleIndex)
         {
             if (currentDepth > config.Depth) return;
 
             try
             {
-                // Dateien verarbeiten
                 foreach (var file in Directory.GetFiles(currentPath))
                 {
                     string ext = Path.GetExtension(file).ToLower();
-
-                    // Optimierte Prüfung: Ist die Endung im Set oder ist Wildcard erlaubt?
                     if (allowedExts.Contains(".*") || allowedExts.Contains("*") || allowedExts.Contains(ext))
                     {
-                        results.Add(file);
+                        // GEÄNDERT: Wir speichern Pfad UND Regel-Nummer
+                        results.Add(new IndexedItem { Path = file, RuleIndex = ruleIndex });
                         fileCount++;
                     }
                 }
 
-                // Ordner verarbeiten
                 foreach (var subDir in Directory.GetDirectories(currentPath))
                 {
                     if (config.IncludeDirectories)
                     {
-                        results.Add(subDir);
+                        results.Add(new IndexedItem { Path = subDir, RuleIndex = ruleIndex });
                         folderCount++;
                     }
-                    // Rekursion
-                    ScanDirectory(subDir, config, currentDepth + 1, results, ref fileCount, ref folderCount, allowedExts);
+                    ScanDirectory(subDir, config, currentDepth + 1, results, ref fileCount, ref folderCount, allowedExts, ruleIndex);
                 }
             }
-            catch (Exception)
-            {
-                // Ob UnauthorizedAccess oder verschwundener USB-Stick: 
-                // Wir fangen alles ab, damit der gesamte Scan nicht abbricht.
-            }
+            catch (Exception) { }
         }
     }
 }

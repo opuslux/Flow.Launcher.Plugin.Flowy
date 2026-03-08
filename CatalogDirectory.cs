@@ -15,6 +15,7 @@ namespace Flow.Launcher.Plugin.Flowy
         private int _fileCount = 0;
         private int _folderCount = 0;
         private string _comment = "";
+        private int _index;
 
         // NEU: Zwischenspeicher, damit das UI beim Tippen nicht gestört wird
         private string _fileTypesRaw = null;
@@ -39,6 +40,9 @@ namespace Flow.Launcher.Plugin.Flowy
 
         [JsonIgnore]
         public int FileCount { get => _fileCount; set { _fileCount = value; OnPropertyChanged(); } }
+
+        [JsonIgnore] // Die Nummer ist dynamisch und muss nicht gespeichert werden
+        public int Index { get => _index; set { _index = value; OnPropertyChanged(); } }
 
         [JsonIgnore]
         public int FolderCount { get => _folderCount; set { _folderCount = value; OnPropertyChanged(); } }

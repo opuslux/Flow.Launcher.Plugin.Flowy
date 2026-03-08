@@ -83,7 +83,7 @@ namespace Flow.Launcher.Plugin.Flowy
             var dialog = new SaveFileDialog
             {
                 Filter = "JSON Files (*.json)|*.json",
-                FileName = "FlowySettingsBackup.json"
+                FileName = $"Flowy Settings Backup - {DateTime.Now:yyyyMMdd}.json"
             };
 
             if (dialog.ShowDialog() == true)
