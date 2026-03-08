@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 
 namespace Flow.Launcher.Plugin.Flowy
 {
-    // INotifyPropertyChanged sorgt dafür, dass die Tabelle sich live updatet
     public class CatalogDirectory : INotifyPropertyChanged
     {
         private string _path = "";
@@ -15,13 +14,29 @@ namespace Flow.Launcher.Plugin.Flowy
         private bool _includeDirectories = false;
         private int _fileCount = 0;
         private int _folderCount = 0;
+        private string _comment = "";
+
+        // NEU: Zwischenspeicher, damit das UI beim Tippen nicht gestört wird
+        private string _fileTypesRaw = null;
 
         public string Path { get => _path; set { _path = value; OnPropertyChanged(); } }
-        public int Depth { get => _depth; set { _depth = value; OnPropertyChanged(); } }
-        public List<string> FileTypes { get => _fileTypes; set { _fileTypes = value; OnPropertyChanged(); OnPropertyChanged(nameof(FileTypesDisplay)); } }
-        public bool IncludeDirectories { get => _includeDirectories; set { _includeDirectories = value; OnPropertyChanged(); } }
+        public int Depth { get => _depth; set { _depth = value; OnPropertyChanged(); OnPropertyChanged(nameof(DepthDisplay)); } }
 
-        // NEU: Die Statistiken (JsonIgnore verhindert, dass sie in der settings.json landen)
+        public List<string> FileTypes
+        {
+            get => _fileTypes;
+            set
+            {
+                _fileTypes = value;
+                _fileTypesRaw = null; // Reset, wenn Daten z.B. aus der JSON geladen werden
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FileTypesDisplay));
+            }
+        }
+
+        public bool IncludeDirectories { get => _includeDirectories; set { _includeDirectories = value; OnPropertyChanged(); } }
+        public string Comment { get => _comment; set { _comment = value; OnPropertyChanged(); } }
+
         [JsonIgnore]
         public int FileCount { get => _fileCount; set { _fileCount = value; OnPropertyChanged(); } }
 
@@ -31,11 +46,31 @@ namespace Flow.Launcher.Plugin.Flowy
         [JsonIgnore]
         public string FileTypesDisplay
         {
-            get => string.Join("; ", FileTypes);
-            set => FileTypes = value.Split(';')
-                                    .Select(s => s.Trim())
-                                    .Where(s => !string.IsNullOrEmpty(s))
-                                    .ToList();
+            // Zeigt den rohen Text an (falls gerade getippt wird), ansonsten den formatierten
+            get => _fileTypesRaw ?? string.Join("; ", FileTypes);
+            set
+            {
+                _fileTypesRaw = value;
+                _fileTypes = value.Split(new[] { ';', ',' })
+                                 .Select(s => s.Trim())
+                                 .Where(s => !string.IsNullOrEmpty(s))
+                                 .ToList();
+
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FileTypes)); // Informiert das System über die neue Liste
+            }
+        }
+
+        [JsonIgnore]
+        public string DepthDisplay
+        {
+            get => Depth <= 0 ? "" : Depth.ToString();
+            set
+            {
+                if (int.TryParse(value, out int d)) { Depth = d; }
+                else { Depth = 0; }
+                OnPropertyChanged();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
