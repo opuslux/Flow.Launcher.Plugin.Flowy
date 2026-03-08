@@ -16,11 +16,12 @@ namespace Flow.Launcher.Plugin.Flowy
         private PluginInitContext _context;
         private Settings _settings;
         private Indexer _indexer = new Indexer();
-        private string _settingsPath;
+
+        // _settingsPath wurde entfernt, das macht jetzt die API!
         private string _cachePath;
         private System.Timers.Timer _rescanTimer;
 
-        // NEU: Ein Schloss für die Thread-Sicherheit
+        // Ein Schloss für die Thread-Sicherheit
         private readonly object _catalogLock = new object();
 
         public void Init(PluginInitContext context)
@@ -35,17 +36,22 @@ namespace Flow.Launcher.Plugin.Flowy
                                 "Flowy Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
             };
 
-            // REFACTOR: Pfade in den offiziellen Daten-Ordner verlegen
-            var dataDirectory = _context.CurrentPluginMetadata.PluginDirectory;
-            // Optional: Path.Combine(_context.API.GetPluginDataPath("Flowy")) nutzen für echte Datentrennung
+            // NEU: Flow Launcher lädt die Settings automatisch vom korrekten Ort (Portable oder %APPDATA%)
+            _settings = _context.API.LoadSettingJsonStorage<Settings>();
 
-            _settingsPath = Path.Combine(dataDirectory, "settings.json");
+            // Sicherheits-Check: Falls die Datei komplett neu ist
+            if (_settings.RescanIntervalMinutes <= 0)
+            {
+                _settings.RescanIntervalMinutes = 30;
+            }
+
+            // Der Cache bleibt lokal im Plugin-Ordner (Darf bei einem Update ruhig gelöscht werden)
+            var dataDirectory = _context.CurrentPluginMetadata.PluginDirectory;
             _cachePath = Path.Combine(dataDirectory, "cache.json");
 
-            _settings = LoadSettings();
             LoadCache();
 
-            // REFACTOR: Erster Scan über die zentrale Methode
+            // Erster Scan über die zentrale Methode
             TriggerScan();
 
             StartRescanTimer();
@@ -57,7 +63,7 @@ namespace Flow.Launcher.Plugin.Flowy
 
             var results = new List<Result>();
 
-            // NEU: Sperren, damit der Indexer nicht während der Suche reinschreibt
+            // Sperren, damit der Indexer nicht während der Suche reinschreibt
             lock (_catalogLock)
             {
                 foreach (var path in _indexer.Catalog)
@@ -110,7 +116,7 @@ namespace Flow.Launcher.Plugin.Flowy
         public void TriggerScan()
         {
             Task.Run(() => {
-                // NEU: Auch beim Schreiben sperren!
+                // Auch beim Schreiben sperren!
                 lock (_catalogLock)
                 {
                     _indexer.BuildIndex(_settings.Directories);
@@ -126,23 +132,11 @@ namespace Flow.Launcher.Plugin.Flowy
 
         // --- Speicher-Logik ---
 
-        private Settings LoadSettings()
-        {
-            if (!File.Exists(_settingsPath)) return new Settings();
-            try
-            {
-                string json = File.ReadAllText(_settingsPath);
-                var loaded = JsonSerializer.Deserialize<Settings>(json);
-                if (loaded != null && loaded.RescanIntervalMinutes <= 0) loaded.RescanIntervalMinutes = 30;
-                return loaded ?? new Settings();
-            }
-            catch { return new Settings(); }
-        }
-
         public void SaveSettings()
         {
-            string json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_settingsPath, json);
+            // NEU: API speichert am perfekten, update-sicheren Ort
+            _context.API.SaveSettingJsonStorage<Settings>();
+
             StartRescanTimer(); // Timer aktualisieren
         }
 
