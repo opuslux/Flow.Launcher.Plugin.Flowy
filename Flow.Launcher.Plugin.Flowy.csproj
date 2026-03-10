@@ -3,14 +3,14 @@
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
+		<Nullable>disable</Nullable>
 		<UseWPF>true</UseWPF>
 		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
 		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Flow.Launcher.Plugin" Version="2.0.1" ExcludeAssets="runtime" />
+		<PackageReference Include="Flow.Launcher.Plugin" Version="2.1.0" ExcludeAssets="runtime" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Kill Flow Launcher",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "Stop-Process -Name 'Flow.Launcher' -Force -ErrorAction SilentlyContinue; exit 0"
+            ],
+            "presentation": { "reveal": "silent" }
+        },
+        {
+            "label": "Build Project",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/Flow.Launcher.Plugin.Flowy.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Kill Flow Launcher"
+        }
+    ]
+}

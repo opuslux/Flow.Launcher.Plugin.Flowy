@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flow Launcher (Debug Flowy)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build Project",
+            "program": "D:\\d_apps\\FlowLauncher\\app-2.1.1\\Flow.Launcher.exe",
+            "cwd": "D:\\d_apps\\FlowLauncher\\app-2.1.1",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
