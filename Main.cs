@@ -54,7 +54,6 @@ namespace Flow.Launcher.Plugin.Flowy
 
             lock (_catalogLock)
             {
-                // WICHTIG: Wir iterieren jetzt über IndexedItem Objekte
                 foreach (var item in _indexer.Catalog)
                 {
                     string fileNameWithExt = Path.GetFileName(item.Path);
@@ -62,22 +61,34 @@ namespace Flow.Launcher.Plugin.Flowy
 
                     if (matchResult.Score > 0)
                     {
+                        // NEU: Präfix basierend auf Settings zusammenbauen
+                        string prefix = _settings.ShowRuleNumber ? $"#{item.RuleIndex} | " : "";
+
                         results.Add(new Result
                         {
                             Title = fileNameWithExt,
-                            // Zeigt die Regel-Nummer im Untertitel an
-                            SubTitle = $"#{item.RuleIndex} | {Path.GetDirectoryName(item.Path)}",
+                            SubTitle = $"{prefix}{Path.GetDirectoryName(item.Path)}",
                             IcoPath = item.Path,
                             Score = matchResult.Score,
-                            Action = _ => {
-                                try
+                            Action = e =>
+                            {
+                                // Wenn STRG gedrückt gehalten wird
+                                if (e.SpecialKeyState.CtrlPressed)
                                 {
-                                    // WICHTIG: Hier muss item.Path stehen, nicht mehr nur path!
-                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(item.Path) { UseShellExecute = true });
+                                    try 
+                                    { 
+                                        // /select sorgt dafür, dass der Explorer öffnet UND die Datei markiert
+                                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.Path}\""); 
+                                    }
+                                    catch (Exception ex) { _context.API.ShowMsg("Fehler beim Lokalisieren", ex.Message); }
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    _context.API.ShowMsg("Fehler beim Öffnen", ex.Message);
+                                    try 
+                                    { 
+                                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(item.Path) { UseShellExecute = true }); 
+                                    }
+                                    catch (Exception ex) { _context.API.ShowMsg("Fehler beim Öffnen", ex.Message); }
                                 }
                                 return true;
                             }
@@ -86,7 +97,8 @@ namespace Flow.Launcher.Plugin.Flowy
                 }
             }
 
-            return results.OrderByDescending(r => r.Score).Take(1000).ToList();
+            // NEU: Nutzt jetzt den Wert aus den Settings statt der harten 1000
+            return results.OrderByDescending(r => r.Score).Take(_settings.MaxResults).ToList();
         }
 
         public Control CreateSettingPanel()
