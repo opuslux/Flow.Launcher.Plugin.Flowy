@@ -9,7 +9,7 @@ namespace Flow.Launcher.Plugin.Flowy
     public class CatalogDirectory : INotifyPropertyChanged
     {
         private string _path = "";
-        private int _depth = 2;
+        private int _depth = 0; // Standardmäßig 0 erlauben
         private List<string> _fileTypes = new List<string> { "*.lnk" };
         private bool _includeDirectories = false;
         private int _fileCount = 0;
@@ -21,7 +21,19 @@ namespace Flow.Launcher.Plugin.Flowy
         private string _fileTypesRaw = null;
 
         public string Path { get => _path; set { _path = value; OnPropertyChanged(); } }
-        public int Depth { get => _depth; set { _depth = value; OnPropertyChanged(); OnPropertyChanged(nameof(DepthDisplay)); } }
+        public int Depth
+        {
+            get => _depth;
+            set
+            {
+                // Erlaube Werte ab 0. Blockiere nur negative Zahlen.
+                if (value >= 0)
+                {
+                    _depth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public List<string> FileTypes
         {
@@ -68,11 +80,13 @@ namespace Flow.Launcher.Plugin.Flowy
         [JsonIgnore]
         public string DepthDisplay
         {
-            get => Depth <= 0 ? "" : Depth.ToString();
+            get => Depth.ToString();
             set
             {
-                if (int.TryParse(value, out int d)) { Depth = d; }
-                else { Depth = 0; }
+                if (int.TryParse(value, out int result))
+                {
+                    Depth = result; // Setzt die 0 im int-Feld
+                }
                 OnPropertyChanged();
             }
         }

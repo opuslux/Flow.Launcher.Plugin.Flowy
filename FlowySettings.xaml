@@ -3,11 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="Transparent"
              HorizontalAlignment="Stretch"
-        HorizontalContentAlignment="Stretch">
+             HorizontalContentAlignment="Stretch">
 
     <UserControl.Resources>
         <Style x:Key="PlaceholderTextBoxStyle"
-                TargetType="TextBox">
+               TargetType="TextBox">
             <Setter Property="Padding"
                     Value="5,4"/>
             <Setter Property="Foreground"
@@ -25,24 +25,24 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="0,0,0,1">
                                 <ScrollViewer x:Name="PART_ContentHost"
-                                        Margin="0"/>
+                                              Margin="0"/>
                             </Border>
                             <TextBlock x:Name="Watermark"
-                                    Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
-                                    Foreground="{DynamicResource Color18B}"
-                                    Margin="7,0,10,0"
-                                    VerticalAlignment="Center"
-                                    Visibility="Collapsed"
-                                    IsHitTestVisible="False"
-                                    FontSize="12"/>
+                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       Foreground="{DynamicResource Color18B}"
+                                       Margin="7,0,10,0"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"
+                                       IsHitTestVisible="False"
+                                       FontSize="12"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="Text"
-                                            Value=""/>
+                                               Value=""/>
                                     <Condition Property="IsFocused"
-                                            Value="False"/>
+                                               Value="False"/>
                                 </MultiTrigger.Conditions>
                                 <Setter TargetName="Watermark"
                                         Property="Visibility"
@@ -55,7 +55,7 @@
         </Style>
 
         <Style x:Key="CustomExpanderStyle"
-                TargetType="Expander">
+               TargetType="Expander">
             <Setter Property="Background"
                     Value="Transparent"/>
             <Setter Property="HorizontalContentAlignment"
@@ -78,21 +78,21 @@
                                 BorderThickness="{TemplateBinding BorderThickness}">
                             <DockPanel>
                                 <ToggleButton x:Name="HeaderSite"
-                                        DockPanel.Dock="Top"
+                                              DockPanel.Dock="Top"
                                               Padding="{TemplateBinding Padding}"
                                               Foreground="{TemplateBinding Foreground}"
                                               IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                               Style="{DynamicResource ExpanderHeaderRightArrowStyle}"
                                               Content="{TemplateBinding Header}"/>
                                 <ContentPresenter x:Name="ExpandSite"
-                                        Visibility="Collapsed"
-                                        DockPanel.Dock="Bottom"
-                                        Margin="{TemplateBinding Padding}"/>
+                                                  Visibility="Collapsed"
+                                                  DockPanel.Dock="Bottom"
+                                                  Margin="{TemplateBinding Padding}"/>
                             </DockPanel>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsExpanded"
-                                    Value="true">
+                                     Value="true">
                                 <Setter TargetName="ExpandSite"
                                         Property="Visibility"
                                         Value="Visible"/>
@@ -107,8 +107,8 @@
     <StackPanel Margin="-2 0 -2 0">
 
         <Expander Header="General Setting"
-                IsExpanded="False"
-                Style="{StaticResource CustomExpanderStyle}">
+                  IsExpanded="False"
+                  Style="{StaticResource CustomExpanderStyle}">
             <Grid Margin="32 -10 0 10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -122,48 +122,48 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0"
-                        Text="Maximum results to return:"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource Color05B}"
-                        Margin="0,5"/>
+                           Text="Maximum results to return:"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Color05B}"
+                           Margin="0,5"/>
                 <TextBox Grid.Row="0"
-                        Grid.Column="1"
-                        Width="80"
-                        HorizontalAlignment="Left"
-                        Text="{Binding MaxResults, UpdateSourceTrigger=PropertyChanged}"
-                        Style="{StaticResource PlaceholderTextBoxStyle}"
-                        Tag="1000"
-                        PreviewTextInput="NumberValidationTextBox"
-                        TextChanged="UIField_Changed"/>
+                         Grid.Column="1"
+                         Width="80"
+                         HorizontalAlignment="Left"
+                         Text="{Binding MaxResults, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource PlaceholderTextBoxStyle}"
+                         Tag="1000"
+                         PreviewTextInput="NumberValidationTextBox"
+                         TextChanged="UIField_Changed"/>
 
                 <TextBlock Grid.Row="1"
-                        Text="Autoscan interval (min):"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource Color05B}"
-                        Margin="0,5"/>
+                           Text="Autoscan interval (min):"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Color05B}"
+                           Margin="0,5"/>
                 <TextBox Grid.Row="1"
-                        Grid.Column="1"
-                        Width="80"
-                        HorizontalAlignment="Left"
-                        Text="{Binding RescanIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
-                        Style="{StaticResource PlaceholderTextBoxStyle}"
-                        Tag="30"
-                        PreviewTextInput="NumberValidationTextBox"
-                        TextChanged="IntervalTextBox_TextChanged"/>
+                         Grid.Column="1"
+                         Width="80"
+                         HorizontalAlignment="Left"
+                         Text="{Binding RescanIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource PlaceholderTextBoxStyle}"
+                         Tag="30"
+                         PreviewTextInput="NumberValidationTextBox"
+                         TextChanged="IntervalTextBox_TextChanged"/>
 
                 <CheckBox Grid.Row="2"
-                        Grid.ColumnSpan="2"
-                        IsChecked="{Binding ShowRuleNumber, UpdateSourceTrigger=PropertyChanged}"
-                        Content="Show Rule Number in results (e.g. #7 | ...)"
-                        Foreground="{DynamicResource Color05B}"
-                        Margin="0,15,0,15"
-                        Checked="UIField_Changed"
-                        Unchecked="UIField_Changed"/>
+                          Grid.ColumnSpan="2"
+                          IsChecked="{Binding ShowRuleNumber, UpdateSourceTrigger=PropertyChanged}"
+                          Content="Show Rule Number in results (e.g. #7 | ...)"
+                          Foreground="{DynamicResource Color05B}"
+                          Margin="0,15,0,15"
+                          Checked="UIField_Changed"
+                          Unchecked="UIField_Changed"/>
 
                 <StackPanel Grid.Row="3"
-                        Grid.ColumnSpan="2"
-                        Orientation="Horizontal"
-                        Margin="0,0,0,10">
+                            Grid.ColumnSpan="2"
+                            Orientation="Horizontal"
+                            Margin="0,0,0,10">
                     <Button Content="📥 Import Settings"
                             Click="Import_Click"
                             Padding="15,5"
@@ -178,8 +178,8 @@
         </Expander>
 
         <Expander Header="Catalogue"
-                IsExpanded="False"
-                Style="{StaticResource CustomExpanderStyle}">
+                  IsExpanded="False"
+                  Style="{StaticResource CustomExpanderStyle}">
             <Grid Margin="32 -10 0 10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -188,12 +188,12 @@
                 </Grid.RowDefinitions>
 
                 <ListBox x:Name="DirectoryList"
-                        Grid.Row="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        MaxHeight="500"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                        HorizontalContentAlignment="Stretch">
+                         Grid.Row="0"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         MaxHeight="500"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         HorizontalContentAlignment="Stretch">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="HorizontalContentAlignment"
@@ -230,7 +230,7 @@
                                             VerticalAlignment="Center"
                                             Foreground="{DynamicResource Color18B}"
                                             FontWeight="Bold"
-                                            ToolTip="Index dieser Regel"/>
+                                            ToolTip="Index of this rule"/>
 
                                     <TextBox Grid.Row="0"
                                             Grid.Column="1"
@@ -238,7 +238,7 @@
                                             Margin="0,0,8,10"
                                             Style="{StaticResource PlaceholderTextBoxStyle}"
                                             Tag="Path"
-                                             ToolTip="Vollständiger Verzeichnispfad (z.B. C:\Tools oder %UserProfile%\Desktop)"/>
+                                             ToolTip="Full directory path (e.g. C:\Tools or %UserProfile%\Desktop)"/>
 
                                     <TextBox Grid.Row="0"
                                             Grid.Column="2"
@@ -246,7 +246,7 @@
                                             Margin="0,0,8,10"
                                             Style="{StaticResource PlaceholderTextBoxStyle}"
                                             Tag="D"
-                                             ToolTip="Suchtiefe: 0 = nur dieser Ordner, 1 = eine Unterebene, usw."/>
+                                             ToolTip="Search depth: 0 = this folder only, 1 = one sub-level, etc."/>
 
                                     <TextBox Grid.Row="0"
                                             Grid.Column="3"
@@ -254,7 +254,7 @@
                                             Margin="0,0,8,10"
                                             Style="{StaticResource PlaceholderTextBoxStyle}"
                                             Tag="*.*"
-                                             ToolTip="Dateiendungen filtern (z.B. *.exe; *.lnk; *.pdf). Leer lassen für alle Dateien."/>
+                                             ToolTip="Filter file extensions (e.g. *.exe; *.lnk). Leave empty to scan NO files (Folders only)."/>
 
                                     <CheckBox Grid.Row="0"
                                             Grid.Column="4"
@@ -263,7 +263,7 @@
                                             Foreground="{DynamicResource Color05B}"
                                             VerticalAlignment="Center"
                                             Margin="0,0,0,10"
-                                              ToolTip="Sollen Ordner selbst auch als Suchergebnis angezeigt werden?"/>
+                                              ToolTip="Should folders themselves be shown as search results?"/>
 
                                     <Button Grid.Row="0"
                                             Grid.Column="5"
@@ -275,7 +275,7 @@
                                             BorderThickness="0"
                                             Foreground="#FF5555"
                                             FontWeight="Bold"
-                                            ToolTip="Diese Regel dauerhaft löschen"/>
+                                            ToolTip="Delete this rule permanently"/>
 
                                     <TextBox Grid.Row="1"
                                             Grid.Column="1"
@@ -283,7 +283,7 @@
                                             Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
                                             Style="{StaticResource PlaceholderTextBoxStyle}"
                                             Tag="Comment"
-                                             ToolTip="Persönlicher Kommentar oder Notiz zu diesem Eintrag"/>
+                                             ToolTip="Personal comment or note for this entry"/>
 
                                     <TextBlock Grid.Row="1"
                                             Grid.Column="5"
@@ -291,8 +291,8 @@
                                             HorizontalAlignment="Right"
                                             Foreground="{DynamicResource Color18B}"
                                             FontSize="10"
-                                               ToolTip="Anzahl der aktuell gefundenen Dateien (F) und Ordner (D) für diese Regel">
-                <Run Text="{Binding FileCount, Mode=OneWay}"/> files | <Run Text="{Binding FolderCount, Mode=OneWay}"/> folders
+                                               ToolTip="Number of currently indexed files (F) and directories (D)">
+                    <Run Text="{Binding FileCount, Mode=OneWay}"/> files | <Run Text="{Binding FolderCount, Mode=OneWay}"/> folders
                                     </TextBlock>
                                 </Grid>
                             </Border>
@@ -301,9 +301,9 @@
                 </ListBox>
 
                 <StackPanel Grid.Row="1"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Margin="0,15,15,10">
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,15,15,10">
                     <Button Content="➕ Add Folder"
                             Click="AddFolder_Click"
                             Padding="15,5"
@@ -313,11 +313,11 @@
                             Padding="15,5"/>
                 </StackPanel>
                 <ProgressBar x:Name="ScanProgressBar"
-                        Grid.Row="2"
-                        Height="3"
-                        Margin="0,5,15,10"
-                        IsIndeterminate="True"
-                        Visibility="Collapsed"/>
+                             Grid.Row="2"
+                             Height="3"
+                             Margin="0,5,15,10"
+                             IsIndeterminate="True"
+                             Visibility="Collapsed"/>
             </Grid>
         </Expander>
     </StackPanel>

@@ -145,15 +145,18 @@ namespace Flow.Launcher.Plugin.Flowy
             SaveWithDelay();
         }
 
-        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
+            // Erlaubt nur Ziffern (0-9). 
+            // e.Text ist nur das Zeichen, das gerade getippt wurde.
+            var regex = new System.Text.RegularExpressions.Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
         private void SaveWithDelay()
         {
-            Task.Run(async () => {
+            Task.Run(async () =>
+            {
                 await Task.Delay(100);
                 _plugin.SaveSettings();
             });

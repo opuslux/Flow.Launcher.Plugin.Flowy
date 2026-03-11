@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace Flow.Launcher.Plugin.Flowy
 {
-    // NEU: Container für Pfad + Info zur Regel
     public class IndexedItem
     {
         public string Path { get; set; }
@@ -15,8 +14,6 @@ namespace Flow.Launcher.Plugin.Flowy
     public class Indexer
     {
         private readonly object _scanLock = new object();
-
-        // GEÄNDERT: Liste von Objekten statt Strings
         public List<IndexedItem> Catalog { get; set; } = new List<IndexedItem>();
 
         public void BuildIndex(IEnumerable<CatalogDirectory> directories)
@@ -28,9 +25,7 @@ namespace Flow.Launcher.Plugin.Flowy
 
                 foreach (var dirConfig in directories)
                 {
-                    // NEU: Wir setzen die Nummer für die UI-Anzeige
                     dirConfig.Index = currentRule;
-
                     string expandedPath = Environment.ExpandEnvironmentVariables(dirConfig.Path);
 
                     if (Directory.Exists(expandedPath))
@@ -38,11 +33,14 @@ namespace Flow.Launcher.Plugin.Flowy
                         int fileCount = 0;
                         int folderCount = 0;
 
+                        // Wir filtern leere Einträge heraus. 
+                        // Wenn der User nichts eingibt, bleibt die Liste leer.
                         var allowedExtensions = new HashSet<string>(
-                            dirConfig.FileTypes.Select(t => t.TrimStart('*').ToLower())
+                            dirConfig.FileTypes
+                                .Where(t => !string.IsNullOrWhiteSpace(t))
+                                .Select(t => t.TrimStart('*').ToLower())
                         );
 
-                        // Wir geben die aktuelle Regel-Nummer an den Scan weiter
                         ScanDirectory(expandedPath, dirConfig, 0, newCatalog, ref fileCount, ref folderCount, allowedExtensions, currentRule);
 
                         dirConfig.FileCount = fileCount;
@@ -62,21 +60,30 @@ namespace Flow.Launcher.Plugin.Flowy
 
         private void ScanDirectory(string currentPath, CatalogDirectory config, int currentDepth, List<IndexedItem> results, ref int fileCount, ref int folderCount, HashSet<string> allowedExts, int ruleIndex)
         {
+            // Depth = 0 bedeutet: Nur den aktuellen Ordner scannen, keine Unterordner.
             if (currentDepth > config.Depth) return;
 
             try
             {
-                foreach (var file in Directory.GetFiles(currentPath))
+                // 1. DATEIEN SCANNEN
+                // Nur wenn allowedExts nicht leer ist, scannen wir überhaupt Dateien.
+                // Das spart Zeit und erfüllt den Wunsch: "Leer = nichts scannen"
+                if (allowedExts.Count > 0)
                 {
-                    string ext = Path.GetExtension(file).ToLower();
-                    if (allowedExts.Contains(".*") || allowedExts.Contains("*") || allowedExts.Contains(ext))
+                    foreach (var file in Directory.GetFiles(currentPath))
                     {
-                        // GEÄNDERT: Wir speichern Pfad UND Regel-Nummer
-                        results.Add(new IndexedItem { Path = file, RuleIndex = ruleIndex });
-                        fileCount++;
+                        string ext = Path.GetExtension(file).ToLower();
+                        
+                        // Check auf *.* , * oder die spezifische Extension
+                        if (allowedExts.Contains(".*") || allowedExts.Contains("") || allowedExts.Contains(ext))
+                        {
+                            results.Add(new IndexedItem { Path = file, RuleIndex = ruleIndex });
+                            fileCount++;
+                        }
                     }
                 }
 
+                // 2. ORDNER SCANNEN & REKURSION
                 foreach (var subDir in Directory.GetDirectories(currentPath))
                 {
                     if (config.IncludeDirectories)
@@ -84,10 +91,14 @@ namespace Flow.Launcher.Plugin.Flowy
                         results.Add(new IndexedItem { Path = subDir, RuleIndex = ruleIndex });
                         folderCount++;
                     }
+
+                    // Auch wenn wir keine Ordner im Index wollen, müssen wir für die 
+                    // Rekursion tiefer gehen, sofern die eingestellte Tiefe noch nicht erreicht ist.
                     ScanDirectory(subDir, config, currentDepth + 1, results, ref fileCount, ref folderCount, allowedExts, ruleIndex);
                 }
             }
-            catch (Exception) { }
+            catch (UnauthorizedAccessException) { /* Systemordner einfach überspringen */ }
+            catch (Exception) { /* Sicherheitshalber alles andere auch abfangen */ }
         }
     }
 }
