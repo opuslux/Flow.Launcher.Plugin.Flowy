@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -11,7 +12,7 @@ using Flow.Launcher.Plugin;
 
 namespace Flow.Launcher.Plugin.Flowy
 {
-    public class Main : IPlugin, ISettingProvider
+    public class Main : IPlugin, ISettingProvider, IContextMenu
     {
         private PluginInitContext _context;
         private Settings _settings;
@@ -44,6 +45,34 @@ namespace Flow.Launcher.Plugin.Flowy
             LoadCache();
             TriggerScan();
             StartRescanTimer();
+        }
+
+        public List<Result> LoadContextMenus(Result result)
+        {
+            var results = new List<Result>();
+
+            if (result == null || string.IsNullOrEmpty(result.IcoPath))
+                return results;
+
+            results.Add(new Result
+            {
+                Title = "Open in File Explorer",
+                IcoPath = "Explorer",
+                Action = e =>
+                {
+                    try
+                    {
+                        Process.Start("explorer.exe", $"/select,\"{result.IcoPath}\"");
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.API.ShowMsg("Fehler beim Öffnen", ex.Message);
+                    }
+                    return true;
+                }
+            });
+
+            return results;
         }
 
         public List<Result> Query(Query query)
