@@ -4,7 +4,9 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
+  # workflow_dispatch bleibt als Notfall-Knopf, falls du es mal aus VS Code testen willst.
+  # Es nimmt dann einfach "1.0.0-dev", wenn kein Tag da ist.
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -23,11 +25,21 @@ jobs:
       shell: pwsh
       run: |
         $tag = "${{ github.ref_name }}"
+        
+        # Fallback, falls jemand manuell den "Run Workflow" Button auf dem main-Branch drückt
+        if ($tag -eq "main" -or $tag -eq "master") {
+            $tag = "v1.0.0-dev"
+        }
+
+        # Entfernt das "v" am Anfang
         $fullVersion = $tag -replace '^v\.?', ''
         $numericVersion = "1.0.0"
+        
+        # Sucht die reine Zahl (z.B. 1.0.1 aus 1.0.1-beta)
         if ($fullVersion -match '^(\d+\.\d+\.\d+(?:\.\d+)?)') {
             $numericVersion = $Matches[1]
         }
+        
         echo "FULL_VERSION=$fullVersion" >> $env:GITHUB_ENV
         echo "NUMERIC_VERSION=$numericVersion" >> $env:GITHUB_ENV
 
@@ -35,8 +47,10 @@ jobs:
       shell: pwsh
       run: |
         $json = Get-Content plugin.json -Raw | ConvertFrom-Json
-        # HIER GEFIXT: Wir nutzen jetzt strikt die NUMERIC_VERSION für Flow Launcher!
+        
+        # HIER IST DIE MAGIE: Flow Launcher bekommt NUR die saubere Zahl!
         $json.Version = "${{ env.NUMERIC_VERSION }}"
+        
         $json | ConvertTo-Json -Depth 10 | Set-Content plugin.json
     
     - name: Build Project
@@ -47,18 +61,14 @@ jobs:
       shell: pwsh
       run: |
         mkdir ReleaseFiles
-        
-        # Da deine .csproj jetzt alles (DLL, plugin.json, Images/app.png) 
-        # perfekt in den Output-Ordner legt, kopieren wir einfach alles von dort:
         Copy-Item -Path "bin\Release\net9.0-windows\*" -Destination "ReleaseFiles" -Recurse
-        
-        # README kommt meist nicht automatisch in den bin-Ordner, daher separat:
         Copy-Item -Path "README.md" -Destination "ReleaseFiles" -ErrorAction SilentlyContinue
 
     - name: Create Zip Archive
       shell: pwsh
       run: |
-        $zipName = "Flow.Launcher.Plugin.Flowy-${{ github.ref_name }}.zip"
+        # Das ZIP behält den vollen Namen inkl. "-beta"
+        $zipName = "Flow.Launcher.Plugin.Flowy-${{ env.FULL_VERSION }}.zip"
         Compress-Archive -Path "ReleaseFiles\*" -DestinationPath $zipName
         echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
 
