@@ -35,9 +35,10 @@ jobs:
       shell: pwsh
       run: |
         $json = Get-Content plugin.json -Raw | ConvertFrom-Json
-        $json.Version = "${{ env.FULL_VERSION }}"
+        # HIER GEFIXT: Wir nutzen jetzt strikt die NUMERIC_VERSION für Flow Launcher!
+        $json.Version = "${{ env.NUMERIC_VERSION }}"
         $json | ConvertTo-Json -Depth 10 | Set-Content plugin.json
-   
+    
     - name: Build Project
       run: |
         dotnet build -c Release -p:Version=${{ env.FULL_VERSION }} -p:InformationalVersion=${{ env.FULL_VERSION }} -p:AssemblyVersion=1.0.0.0 -p:FileVersion=${{ env.NUMERIC_VERSION }}
