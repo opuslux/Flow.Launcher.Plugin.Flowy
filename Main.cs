@@ -57,7 +57,7 @@ namespace Flow.Launcher.Plugin.Flowy
             results.Add(new Result
             {
                 Title = "Open in File Explorer",
-                IcoPath = "Explorer",
+                Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue838"),
                 Action = e =>
                 {
                     try
