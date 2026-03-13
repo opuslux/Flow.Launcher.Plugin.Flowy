@@ -127,7 +127,7 @@
                          Grid.Row="0"
                          Background="Transparent"
                          BorderThickness="0"
-                         MaxHeight="330"
+                         MaxHeight="330" 
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          HorizontalContentAlignment="Stretch"
                          AllowDrop="True"
@@ -145,12 +145,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid Margin="0,0,15,8">
-                                
-                                <Border BorderBrush="{DynamicResource Color03B}"
-                                        BorderThickness="1"
-                                        CornerRadius="4"
-                                        Padding="10"
-                                        Background="Transparent">
+                                <Border BorderBrush="{DynamicResource Color03B}" BorderThickness="1" CornerRadius="4" Padding="10" Background="Transparent">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
@@ -165,14 +160,7 @@
                                             <ColumnDefinition Width="130"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Row="0"
-                                                    Grid.Column="0"
-                                                    Orientation="Vertical"
-                                                    VerticalAlignment="Center"
-                                                    Cursor="SizeAll"
-                                                    ToolTip="Drag to reorder"
-                                                    Background="Transparent"
-                                                    MouseLeftButtonDown="Handle_MouseLeftButtonDown">
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Drag to reorder" Background="Transparent" MouseLeftButtonDown="Handle_MouseLeftButtonDown">
                                             <TextBlock Text="{Binding IndexDisplay, StringFormat='#{0}'}" Foreground="{DynamicResource Color18B}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/> 
                                             <TextBlock Text="☰" Foreground="{DynamicResource Color18B}" FontWeight="Bold" HorizontalAlignment="Center" FontSize="14"/>
                                         </StackPanel>
@@ -192,21 +180,8 @@
                                     </Grid>
                                 </Border>
 
-                                <Border Height="3" 
-                                        Background="{DynamicResource Color05B}" 
-                                        VerticalAlignment="Top"
-                                        Margin="0,-2,0,0"
-                                        CornerRadius="2"
-                                        IsHitTestVisible="False" 
-                                        Visibility="{Binding ShowDropTop, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
-
-                                <Border Height="3" 
-                                        Background="{DynamicResource Color05B}" 
-                                        VerticalAlignment="Bottom"
-                                        Margin="0,0,0,-2"
-                                        CornerRadius="2"
-                                        IsHitTestVisible="False"
-                                        Visibility="{Binding ShowDropBottom, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                                <Border Height="3" Background="{DynamicResource Color05B}" VerticalAlignment="Top" Margin="0,-2,0,0" CornerRadius="2" IsHitTestVisible="False" Visibility="{Binding ShowDropTop, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                                <Border Height="3" Background="{DynamicResource Color05B}" VerticalAlignment="Bottom" Margin="0,0,0,-2" CornerRadius="2" IsHitTestVisible="False" Visibility="{Binding ShowDropBottom, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -222,5 +197,63 @@
                 <ProgressBar x:Name="ScanProgressBar" Grid.Row="2" Height="3" Margin="0,5,15,10" IsIndeterminate="True" Visibility="Collapsed"/>
             </Grid>
         </Expander>
+
+        <Expander Header="Exclusion Rules" IsExpanded="False" Style="{StaticResource CustomExpanderStyle}">
+            <Grid Margin="32 -10 0 10">
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/> </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Margin="0,0,0,15" Foreground="{DynamicResource Color05B}" TextWrapping="Wrap"
+                           Text="Tip: Leave 'Path' empty to ignore suffixes globally (e.g. *.tmp). Leave 'Suffix' empty to ignore the entire folder."/>
+
+                <ListBox x:Name="ExclusionList"
+                         Grid.Row="1"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         MaxHeight="330" 
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         HorizontalContentAlignment="Stretch"
+                         ItemsSource="{Binding Exclusions}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,15,8">
+                                <Border BorderBrush="{DynamicResource Color03B}" BorderThickness="1" CornerRadius="4" Padding="10" Background="Transparent">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="40"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Grid.Column="0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Path (Leave empty for global exclusion)" ToolTip="Folder to exclude. e.g. C:\Windows"/>
+                                        <CheckBox Grid.Column="1" IsChecked="{Binding Recursive, UpdateSourceTrigger=PropertyChanged}" Content="Recursive" Foreground="{DynamicResource Color05B}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Apply to all sub-folders?"/>
+                                        
+                                        <TextBox Grid.Column="2" Text="{Binding SuffixesDisplay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Suffix (e.g. *.tmp; *.log)" ToolTip="File extensions to ignore. Leave empty to ignore entire folder."/>
+                                        
+                                        <Button Grid.Column="3" Content="✕" HorizontalAlignment="Right" Click="RemoveExclusion_Click" Background="Transparent" BorderThickness="0" Foreground="#FF5555" FontWeight="Bold" ToolTip="Delete this exclusion"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,15,10">
+                    <Button Content="➕ Add Exclusion" Click="AddExclusion_Click" Padding="15,5" Margin="0,0,10,0"/>
+                </StackPanel>
+            </Grid>
+        </Expander>
+
     </StackPanel>
 </UserControl>

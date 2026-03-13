@@ -14,7 +14,6 @@ namespace Flow.Launcher.Plugin.Flowy
 {
     public partial class FlowySettings : UserControl
     {
-        // Drag and Drop state tracking
         private bool _isDragging = false;
         private CatalogDirectory _draggedItem = null;
 
@@ -32,6 +31,9 @@ namespace Flow.Launcher.Plugin.Flowy
             DataContext = _settings;
             DirectoryList.ItemsSource = _settings.Directories;
             
+            // Falls das Plugin geupdatet wird und Exclusions noch nicht initialisiert wurden
+            if (_settings.Exclusions == null) _settings.Exclusions = new ObservableCollection<ExclusionRule>();
+            
             UpdateIndices();
         }
 
@@ -43,7 +45,7 @@ namespace Flow.Launcher.Plugin.Flowy
             }
         }
 
-        // --- Drag and Drop Handlers ---
+        // --- Drag and Drop Handlers (für DirectoryList) ---
 
         private void Handle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -177,7 +179,7 @@ namespace Flow.Launcher.Plugin.Flowy
             return null;
         }
 
-        // --- Buttons: Bottom Bar ---
+        // --- Buttons: Bottom Bar (Catalog) ---
 
         private async void Rescan_Click(object sender, RoutedEventArgs e)
         {
@@ -187,13 +189,14 @@ namespace Flow.Launcher.Plugin.Flowy
                 btn.IsEnabled = false;
                 ScanProgressBar.Visibility = Visibility.Visible;
 
-                await Task.Run(() => _indexer.BuildIndex(_settings.Directories));
+                // NEU: Exclusions an Indexer übergeben
+                await Task.Run(() => _indexer.BuildIndex(_settings.Directories, _settings.Exclusions));
                 _plugin.SaveCache(); 
 
                 int totalFiles = _settings.Directories.Sum(d => d.FileCount);
                 int totalFolders = _settings.Directories.Sum(d => d.FolderCount);
 
-                btn.Content = "Rescan Catalog";
+                btn.Content = "Rescan Catalogue";
                 btn.IsEnabled = true;
                 ScanProgressBar.Visibility = Visibility.Collapsed;
 
@@ -224,33 +227,27 @@ namespace Flow.Launcher.Plugin.Flowy
             if (sender is Button btn && btn.DataContext is CatalogDirectory directory)
             {
                 _settings.Directories.Remove(directory);
-                
                 UpdateIndices();
                 _plugin.SaveSettings();
             }
         }
 
-        // NEU: Sortiert alle Einträge alphabetisch nach dem Pfad
         private void SortPaths_Click(object sender, RoutedEventArgs e)
         {
             if (_settings.Directories.Count <= 1) return;
 
-            // Einträge alphabetisch sortieren und in eine temporäre Liste speichern
             var sortedList = _settings.Directories.OrderBy(d => d.Path).ToList();
             
-            // Aktuelle Liste leeren und sortiert wieder auffüllen
             _settings.Directories.Clear();
             foreach (var item in sortedList)
             {
                 _settings.Directories.Add(item);
             }
 
-            // Neu durchnummerieren und speichern
             UpdateIndices();
             _plugin.SaveSettings();
         }
 
-        // NEU: Löscht alle Einträge auf einmal (mit Sicherheitsabfrage)
         private void DeleteAll_Click(object sender, RoutedEventArgs e)
         {
             if (_settings.Directories.Count == 0) return;
@@ -269,6 +266,28 @@ namespace Flow.Launcher.Plugin.Flowy
             }
         }
 
+        // --- Buttons: Exclusion Rules ---
+        
+        private void AddExclusion_Click(object sender, RoutedEventArgs e)
+        {
+            _settings.Exclusions.Add(new ExclusionRule
+            {
+                Path = "",
+                Recursive = true,
+                Suffixes = new System.Collections.Generic.List<string>()
+            });
+            _plugin.SaveSettings();
+        }
+
+        private void RemoveExclusion_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is ExclusionRule rule)
+            {
+                _settings.Exclusions.Remove(rule);
+                _plugin.SaveSettings();
+            }
+        }
+
         // --- Import / Export ---
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -283,7 +302,9 @@ namespace Flow.Launcher.Plugin.Flowy
             {
                 try
                 {
-                    var json = System.Text.Json.JsonSerializer.Serialize(_settings.Directories, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                    // Hinweis: Wenn wir das so exportieren, speichert es Directories und General Settings, aber nicht Exclusions!
+                    // Wir sollten _settings komplett exportieren (für zukünftige Features)
+                    var json = System.Text.Json.JsonSerializer.Serialize(_settings, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
                     System.IO.File.WriteAllText(dialog.FileName, json);
 
                     MessageBox.Show("Settings successfully exported!", "Export Settings", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -307,12 +328,33 @@ namespace Flow.Launcher.Plugin.Flowy
                 try
                 {
                     var json = System.IO.File.ReadAllText(dialog.FileName);
-                    var imported = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<CatalogDirectory>>(json);
+                    
+                    // Wir versuchen das alte Format (List<CatalogDirectory>) oder das neue Format (Settings-Objekt) zu laden.
+                    try 
+                    {
+                        var importedSettings = System.Text.Json.JsonSerializer.Deserialize<Settings>(json);
+                        if (importedSettings != null && importedSettings.Directories != null)
+                        {
+                            _plugin.ImportDirectories(importedSettings.Directories.ToList());
+                            
+                            _settings.Exclusions.Clear();
+                            if (importedSettings.Exclusions != null)
+                            {
+                                foreach(var ex in importedSettings.Exclusions) _settings.Exclusions.Add(ex);
+                            }
+                            _plugin.SaveSettings();
+                            MessageBox.Show("Settings imported! The catalog is now being rescanned.", "Import Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
+                    } 
+                    catch { /* Fallback */ }
 
+                    // Fallback für alte Backups
+                    var imported = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<CatalogDirectory>>(json);
                     if (imported != null)
                     {
                         _plugin.ImportDirectories(imported);
-                        MessageBox.Show("Settings imported! The catalog is now being rescanned.", "Import Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Legacy settings imported! The catalog is now being rescanned.", "Import Settings", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 catch (Exception ex)

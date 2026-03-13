@@ -56,7 +56,7 @@ namespace Flow.Launcher.Plugin.Flowy
 
             results.Add(new Result
             {
-                Title = "Open in File Explorer",
+                Title = "Show in File Explorer",
                 Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue838"),
                 Action = e =>
                 {
@@ -90,7 +90,6 @@ namespace Flow.Launcher.Plugin.Flowy
 
                     if (matchResult.Score > 0)
                     {
-                        // NEU: Präfix basierend auf Settings zusammenbauen
                         string prefix = _settings.ShowRuleNumber ? $"#{item.RuleIndex} | " : "";
 
                         results.Add(new Result
@@ -101,22 +100,14 @@ namespace Flow.Launcher.Plugin.Flowy
                             Score = matchResult.Score,
                             Action = e =>
                             {
-                                // Wenn STRG gedrückt gehalten wird
                                 if (e.SpecialKeyState.CtrlPressed)
                                 {
-                                    try 
-                                    { 
-                                        // /select sorgt dafür, dass der Explorer öffnet UND die Datei markiert
-                                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.Path}\""); 
-                                    }
+                                    try { System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.Path}\""); }
                                     catch (Exception ex) { _context.API.ShowMsg("Fehler beim Lokalisieren", ex.Message); }
                                 }
                                 else
                                 {
-                                    try 
-                                    { 
-                                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(item.Path) { UseShellExecute = true }); 
-                                    }
+                                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(item.Path) { UseShellExecute = true }); }
                                     catch (Exception ex) { _context.API.ShowMsg("Fehler beim Öffnen", ex.Message); }
                                 }
                                 return true;
@@ -126,7 +117,6 @@ namespace Flow.Launcher.Plugin.Flowy
                 }
             }
 
-            // NEU: Nutzt jetzt den Wert aus den Settings statt der harten 1000
             return results.OrderByDescending(r => r.Score).Take(_settings.MaxResults).ToList();
         }
 
@@ -148,7 +138,8 @@ namespace Flow.Launcher.Plugin.Flowy
             Task.Run(() => {
                 lock (_catalogLock)
                 {
-                    _indexer.BuildIndex(_settings.Directories);
+                    // HIER WAR DER FEHLER: _settings.Exclusions muss mit übergeben werden!
+                    _indexer.BuildIndex(_settings.Directories, _settings.Exclusions);
                 }
                 SaveCache();
             });
@@ -182,18 +173,13 @@ namespace Flow.Launcher.Plugin.Flowy
             try
             {
                 string json = File.ReadAllText(_cachePath);
-                // WICHTIG: Deserialisiert jetzt die neue Objekt-Struktur
                 var cachedCatalog = JsonSerializer.Deserialize<List<IndexedItem>>(json);
                 if (cachedCatalog != null)
                 {
                     lock (_catalogLock) _indexer.Catalog = cachedCatalog;
                 }
             }
-            catch
-            {
-                // Falls der alte Cache (List<string>) nicht geladen werden kann, 
-                // einfach ignorieren, der Scan baut ihn neu auf.
-            }
+            catch { }
         }
 
         public void SaveCache()
