@@ -3,14 +3,21 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace Flow.Launcher.Plugin.Flowy
 {
     public partial class FlowySettings : UserControl
     {
+        // Drag and Drop state tracking
+        private bool _isDragging = false;
+        private CatalogDirectory _draggedItem = null;
+
         private readonly Settings _settings;
         private readonly Indexer _indexer;
         private readonly Main _plugin;
@@ -24,6 +31,150 @@ namespace Flow.Launcher.Plugin.Flowy
 
             DataContext = _settings;
             DirectoryList.ItemsSource = _settings.Directories;
+            
+            UpdateIndices();
+        }
+
+        private void UpdateIndices()
+        {
+            for (int i = 0; i < _settings.Directories.Count; i++)
+            {
+                _settings.Directories[i].Index = i;
+            }
+        }
+
+        // --- Drag and Drop Handlers ---
+
+        private void Handle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var handleGrid = sender as StackPanel; 
+            if (handleGrid?.DataContext is CatalogDirectory directory)
+            {
+                _draggedItem = directory;
+                _isDragging = true;
+                
+                DataObject data = new DataObject(typeof(CatalogDirectory), directory);
+                DragDropEffects effects = DragDrop.DoDragDrop(DirectoryList, data, DragDropEffects.Move);
+                
+                if (effects == DragDropEffects.Move || effects == DragDropEffects.None)
+                {
+                    _draggedItem = null;
+                    _isDragging = false;
+                }
+            }
+        }
+
+        private void DirectoryList_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+
+            var listBox = sender as ListBox;
+            if (listBox == null) return;
+
+            foreach (var item in _settings.Directories)
+            {
+                item.ShowDropTop = false;
+                item.ShowDropBottom = false;
+            }
+
+            var hitTest = VisualTreeHelper.HitTest(listBox, e.GetPosition(listBox));
+            if (hitTest != null)
+            {
+                var listBoxItem = FindAncestor<ListBoxItem>(hitTest.VisualHit);
+                if (listBoxItem != null && listBoxItem.DataContext is CatalogDirectory targetItem && targetItem != _draggedItem)
+                {
+                    Point position = e.GetPosition(listBoxItem);
+                    int targetIndex = _settings.Directories.IndexOf(targetItem);
+                    
+                    if (position.Y < listBoxItem.ActualHeight / 2)
+                    {
+                        targetItem.ShowDropTop = true;
+                    }
+                    else
+                    {
+                        if (targetIndex + 1 < _settings.Directories.Count)
+                        {
+                            var nextItem = _settings.Directories[targetIndex + 1];
+                            if (nextItem != _draggedItem)
+                            {
+                                nextItem.ShowDropTop = true;
+                            }
+                        }
+                        else
+                        {
+                            targetItem.ShowDropBottom = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DirectoryList_DragLeave(object sender, DragEventArgs e)
+        {
+            foreach (var item in _settings.Directories)
+            {
+                item.ShowDropTop = false;
+                item.ShowDropBottom = false;
+            }
+        }
+
+        private void DirectoryList_Drop(object sender, DragEventArgs e)
+        {
+            foreach (var item in _settings.Directories)
+            {
+                item.ShowDropTop = false;
+                item.ShowDropBottom = false;
+            }
+
+            if (e.Data.GetData(typeof(CatalogDirectory)) is CatalogDirectory droppedItem &&
+                _draggedItem != null && _isDragging)
+            {
+                var directories = _settings.Directories;
+                var listBox = sender as ListBox;
+                if (listBox == null) return;
+
+                var hitTest = VisualTreeHelper.HitTest(listBox, e.GetPosition(listBox));
+                if (hitTest != null)
+                {
+                    var listBoxItem = FindAncestor<ListBoxItem>(hitTest.VisualHit);
+                    if (listBoxItem?.DataContext is CatalogDirectory targetItem && targetItem != _draggedItem)
+                    {
+                        Point position = e.GetPosition(listBoxItem);
+                        bool dropAtBottom = position.Y >= listBoxItem.ActualHeight / 2;
+
+                        directories.Remove(_draggedItem);
+                        
+                        int newTargetIndex = directories.IndexOf(targetItem);
+                        if (dropAtBottom) newTargetIndex++;
+
+                        if (newTargetIndex < 0) newTargetIndex = 0;
+                        if (newTargetIndex > directories.Count) newTargetIndex = directories.Count;
+
+                        directories.Insert(newTargetIndex, _draggedItem);
+                        
+                        _plugin.SaveSettings();
+                        UpdateIndices();
+                    }
+                }
+            }
+            
+            _draggedItem = null;
+            _isDragging = false;
+        }
+
+        private static T FindAncestor<T>(DependencyObject dependencyObject) where T : class
+        {
+            var parent = VisualTreeHelper.GetParent(dependencyObject);
+            while (parent != null)
+            {
+                if (parent is T ancestor)
+                {
+                    return ancestor;
+                }
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return null;
         }
 
         // --- Buttons: Bottom Bar ---
@@ -37,7 +188,7 @@ namespace Flow.Launcher.Plugin.Flowy
                 ScanProgressBar.Visibility = Visibility.Visible;
 
                 await Task.Run(() => _indexer.BuildIndex(_settings.Directories));
-                _plugin.SaveCache(); // Cache aktualisieren!
+                _plugin.SaveCache(); 
 
                 int totalFiles = _settings.Directories.Sum(d => d.FileCount);
                 int totalFolders = _settings.Directories.Sum(d => d.FolderCount);
@@ -52,26 +203,68 @@ namespace Flow.Launcher.Plugin.Flowy
 
         private void AddFolder_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFolderDialog();
+            var dialog = new OpenFolderDialog(); 
             if (dialog.ShowDialog() == true)
             {
                 _settings.Directories.Add(new CatalogDirectory
                 {
                     Path = dialog.FolderName,
-                    Depth = 0, // Wird in der UI jetzt als leerer Text angezeigt
-                    FileTypes = new System.Collections.Generic.List<string>(), // Leer für Placeholder
-                    Comment = "" // Leer für Placeholder
+                    Depth = 0, 
+                    FileTypes = new System.Collections.Generic.List<string>(), 
+                    Comment = "" 
                 });
+                
+                UpdateIndices();
                 _plugin.SaveSettings();
             }
         }
 
-        // Row-Level Delete (Das rote ❌ in jeder Zeile)
         private void RemoveRow_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is CatalogDirectory directory)
             {
                 _settings.Directories.Remove(directory);
+                
+                UpdateIndices();
+                _plugin.SaveSettings();
+            }
+        }
+
+        // NEU: Sortiert alle Einträge alphabetisch nach dem Pfad
+        private void SortPaths_Click(object sender, RoutedEventArgs e)
+        {
+            if (_settings.Directories.Count <= 1) return;
+
+            // Einträge alphabetisch sortieren und in eine temporäre Liste speichern
+            var sortedList = _settings.Directories.OrderBy(d => d.Path).ToList();
+            
+            // Aktuelle Liste leeren und sortiert wieder auffüllen
+            _settings.Directories.Clear();
+            foreach (var item in sortedList)
+            {
+                _settings.Directories.Add(item);
+            }
+
+            // Neu durchnummerieren und speichern
+            UpdateIndices();
+            _plugin.SaveSettings();
+        }
+
+        // NEU: Löscht alle Einträge auf einmal (mit Sicherheitsabfrage)
+        private void DeleteAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (_settings.Directories.Count == 0) return;
+
+            var result = MessageBox.Show(
+                "Are you sure you want to permanently delete ALL catalogue rules?\n\nTip: You might want to export your settings first.", 
+                "Delete All Rules", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _settings.Directories.Clear();
+                UpdateIndices();
                 _plugin.SaveSettings();
             }
         }
@@ -93,7 +286,6 @@ namespace Flow.Launcher.Plugin.Flowy
                     var json = System.Text.Json.JsonSerializer.Serialize(_settings.Directories, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
                     System.IO.File.WriteAllText(dialog.FileName, json);
 
-                    // NEU: Bessere Erfolgsmeldung
                     MessageBox.Show("Settings successfully exported!", "Export Settings", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -120,8 +312,6 @@ namespace Flow.Launcher.Plugin.Flowy
                     if (imported != null)
                     {
                         _plugin.ImportDirectories(imported);
-
-                        // NEU: Bessere Erfolgsmeldung
                         MessageBox.Show("Settings imported! The catalog is now being rescanned.", "Import Settings", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
@@ -134,7 +324,6 @@ namespace Flow.Launcher.Plugin.Flowy
 
         // --- Auto-Save Handler ---
 
-        // Fängt Änderungen in allen TextBoxes und CheckBoxes in der Liste automatisch ab
         private void UIField_Changed(object sender, RoutedEventArgs e)
         {
             SaveWithDelay();
@@ -147,8 +336,6 @@ namespace Flow.Launcher.Plugin.Flowy
 
         private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            // Erlaubt nur Ziffern (0-9). 
-            // e.Text ist nur das Zeichen, das gerade getippt wurde.
             var regex = new System.Text.RegularExpressions.Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }

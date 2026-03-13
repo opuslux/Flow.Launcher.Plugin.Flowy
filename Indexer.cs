@@ -21,11 +21,13 @@ namespace Flow.Launcher.Plugin.Flowy
             lock (_scanLock)
             {
                 var newCatalog = new List<IndexedItem>();
-                int currentRule = 1;
+                
+                // HIER IST DER FIX: Wir starten intern bei 0, weil die UI +1 rechnet!
+                int currentRule = 0; 
 
                 foreach (var dirConfig in directories)
                 {
-                    dirConfig.Index = currentRule;
+                    dirConfig.Index = currentRule; 
                     string expandedPath = Environment.ExpandEnvironmentVariables(dirConfig.Path);
 
                     if (Directory.Exists(expandedPath))
@@ -33,15 +35,14 @@ namespace Flow.Launcher.Plugin.Flowy
                         int fileCount = 0;
                         int folderCount = 0;
 
-                        // Wir filtern leere Einträge heraus. 
-                        // Wenn der User nichts eingibt, bleibt die Liste leer.
                         var allowedExtensions = new HashSet<string>(
                             dirConfig.FileTypes
                                 .Where(t => !string.IsNullOrWhiteSpace(t))
                                 .Select(t => t.TrimStart('*').ToLower())
                         );
 
-                        ScanDirectory(expandedPath, dirConfig, 0, newCatalog, ref fileCount, ref folderCount, allowedExtensions, currentRule);
+                        // Wir übergeben currentRule + 1, damit die Suchergebnisse weiterhin mit #1, #2 anfangen
+                        ScanDirectory(expandedPath, dirConfig, 0, newCatalog, ref fileCount, ref folderCount, allowedExtensions, currentRule + 1);
 
                         dirConfig.FileCount = fileCount;
                         dirConfig.FolderCount = folderCount;
@@ -60,21 +61,16 @@ namespace Flow.Launcher.Plugin.Flowy
 
         private void ScanDirectory(string currentPath, CatalogDirectory config, int currentDepth, List<IndexedItem> results, ref int fileCount, ref int folderCount, HashSet<string> allowedExts, int ruleIndex)
         {
-            // Depth = 0 bedeutet: Nur den aktuellen Ordner scannen, keine Unterordner.
             if (currentDepth > config.Depth) return;
 
             try
             {
-                // 1. DATEIEN SCANNEN
-                // Nur wenn allowedExts nicht leer ist, scannen wir überhaupt Dateien.
-                // Das spart Zeit und erfüllt den Wunsch: "Leer = nichts scannen"
                 if (allowedExts.Count > 0)
                 {
                     foreach (var file in Directory.GetFiles(currentPath))
                     {
                         string ext = Path.GetExtension(file).ToLower();
                         
-                        // Check auf *.* , * oder die spezifische Extension
                         if (allowedExts.Contains(".*") || allowedExts.Contains("") || allowedExts.Contains(ext))
                         {
                             results.Add(new IndexedItem { Path = file, RuleIndex = ruleIndex });
@@ -83,7 +79,6 @@ namespace Flow.Launcher.Plugin.Flowy
                     }
                 }
 
-                // 2. ORDNER SCANNEN & REKURSION
                 foreach (var subDir in Directory.GetDirectories(currentPath))
                 {
                     if (config.IncludeDirectories)
@@ -92,8 +87,6 @@ namespace Flow.Launcher.Plugin.Flowy
                         folderCount++;
                     }
 
-                    // Auch wenn wir keine Ordner im Index wollen, müssen wir für die 
-                    // Rekursion tiefer gehen, sofern die eingestellte Tiefe noch nicht erreicht ist.
                     ScanDirectory(subDir, config, currentDepth + 1, results, ref fileCount, ref folderCount, allowedExts, ruleIndex);
                 }
             }

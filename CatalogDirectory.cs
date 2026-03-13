@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -9,7 +8,7 @@ namespace Flow.Launcher.Plugin.Flowy
     public class CatalogDirectory : INotifyPropertyChanged
     {
         private string _path = "";
-        private int _depth = 0; // Standardmäßig 0 erlauben
+        private int _depth = 0;
         private List<string> _fileTypes = new List<string> { "*.lnk" };
         private bool _includeDirectories = false;
         private int _fileCount = 0;
@@ -17,16 +16,20 @@ namespace Flow.Launcher.Plugin.Flowy
         private string _comment = "";
         private int _index;
 
-        // NEU: Zwischenspeicher, damit das UI beim Tippen nicht gestört wird
+        // Zwischenspeicher, damit das UI beim Tippen nicht gestört wird
         private string _fileTypesRaw = null;
 
+        // Steuert die Sichtbarkeit der blauen Einfügelinien
+        private bool _showDropTop;
+        private bool _showDropBottom;
+
         public string Path { get => _path; set { _path = value; OnPropertyChanged(); } }
+        
         public int Depth
         {
             get => _depth;
             set
             {
-                // Erlaube Werte ab 0. Blockiere nur negative Zahlen.
                 if (value >= 0)
                 {
                     _depth = value;
@@ -41,7 +44,7 @@ namespace Flow.Launcher.Plugin.Flowy
             set
             {
                 _fileTypes = value;
-                _fileTypesRaw = null; // Reset, wenn Daten z.B. aus der JSON geladen werden
+                _fileTypesRaw = null;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(FileTypesDisplay));
             }
@@ -53,16 +56,33 @@ namespace Flow.Launcher.Plugin.Flowy
         [JsonIgnore]
         public int FileCount { get => _fileCount; set { _fileCount = value; OnPropertyChanged(); } }
 
-        [JsonIgnore] // Die Nummer ist dynamisch und muss nicht gespeichert werden
-        public int Index { get => _index; set { _index = value; OnPropertyChanged(); } }
+        [JsonIgnore] 
+        public int Index 
+        { 
+            get => _index; 
+            set 
+            { 
+                _index = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(IndexDisplay)); 
+            } 
+        }
+
+        [JsonIgnore]
+        public int IndexDisplay { get => _index + 1; }
 
         [JsonIgnore]
         public int FolderCount { get => _folderCount; set { _folderCount = value; OnPropertyChanged(); } }
 
         [JsonIgnore]
+        public bool ShowDropTop { get => _showDropTop; set { _showDropTop = value; OnPropertyChanged(); } }
+
+        [JsonIgnore]
+        public bool ShowDropBottom { get => _showDropBottom; set { _showDropBottom = value; OnPropertyChanged(); } }
+
+        [JsonIgnore]
         public string FileTypesDisplay
         {
-            // Zeigt den rohen Text an (falls gerade getippt wird), ansonsten den formatierten
             get => _fileTypesRaw ?? string.Join("; ", FileTypes);
             set
             {
@@ -73,7 +93,7 @@ namespace Flow.Launcher.Plugin.Flowy
                                  .ToList();
 
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(FileTypes)); // Informiert das System über die neue Liste
+                OnPropertyChanged(nameof(FileTypes)); 
             }
         }
 
@@ -85,7 +105,7 @@ namespace Flow.Launcher.Plugin.Flowy
             {
                 if (int.TryParse(value, out int result))
                 {
-                    Depth = result; // Setzt die 0 im int-Feld
+                    Depth = result; 
                 }
                 OnPropertyChanged();
             }
