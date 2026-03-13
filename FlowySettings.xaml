@@ -154,7 +154,7 @@
                 <CheckBox Grid.Row="2"
                           Grid.ColumnSpan="2"
                           IsChecked="{Binding ShowRuleNumber, UpdateSourceTrigger=PropertyChanged}"
-                          Content="Show Rule Number in results (e.g. #7 | ...)"
+                          Content="Show Catalogue Rule Number in results (e.g. #7 | ...)"
                           Foreground="{DynamicResource Color05B}"
                           Margin="0,15,0,15"
                           Checked="UIField_Changed"
@@ -177,7 +177,7 @@
             </Grid>
         </Expander>
 
-        <Expander Header="Catalogue"
+        <Expander Header="Catalogue Rules"
                   IsExpanded="False"
                   Style="{StaticResource CustomExpanderStyle}">
             <Grid Margin="32 -10 0 10">
@@ -224,13 +224,15 @@
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Row="0"
-                                            Grid.Column="0"
-                                            Text="{Binding Index}"
-                                            VerticalAlignment="Center"
-                                            Foreground="{DynamicResource Color18B}"
-                                            FontWeight="Bold"
-                                            ToolTip="Index of this rule"/>
+                                    <StackPanel Grid.Row="0"
+                                                Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Index, StringFormat='#{0}'}"
+                                                   Foreground="{DynamicResource Color18B}"
+                                                   FontWeight="Bold"
+                                                   ToolTip="Index of this rule"/>
+                                    </StackPanel>
 
                                     <TextBox Grid.Row="0"
                                             Grid.Column="1"

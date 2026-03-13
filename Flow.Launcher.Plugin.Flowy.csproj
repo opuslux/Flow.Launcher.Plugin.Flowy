@@ -49,7 +49,7 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(GITHUB_ACTIONS)' != 'true'">
 		<Message Importance="high" Text="Starte lokales Deployment..." />
 		<Exec Command="taskkill /f /im Flow.Launcher.exe /t || exit 0" />
-		<Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;D:\d_apps\FlowLauncher\app-2.1.1\Plugins\Flowy\&quot; /Y /I /E" />
+		<Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;D:\d_apps\FlowLauncher\app-2.1.1\UserData\Plugins\FlowyDev\&quot; /Y /I /E" />
 		<Message Importance="high" Text="Lokales Deployment abgeschlossen." />
 	</Target>
 
