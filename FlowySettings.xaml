@@ -204,7 +204,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/> </Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> 
+                </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Margin="0,0,0,15" Foreground="{DynamicResource Color05B}" TextWrapping="Wrap"
                            Text="Tip: Leave 'Path' empty to ignore suffixes globally (e.g. *.tmp). Leave 'Suffix' empty to ignore the entire folder."/>
@@ -231,8 +232,8 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="160"/>
                                             <ColumnDefinition Width="40"/>
                                         </Grid.ColumnDefinitions>
 
