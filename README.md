@@ -1,38 +1,44 @@
-﻿# Flowy for Flow Launcher
+# Flowy for Flow Launcher ⚡
 
-A lightning-fast, custom directory and file indexer for [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher). 
+A lightning-fast, custom directory and file indexer for [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher), built for power users and heavily inspired by the classic Launchy. Flowy gives you absolute control over what gets indexed, how deep the search goes, and what file types are included.
 
-Flowy is designed for power users who want absolute control over what gets indexed, without sacrificing search speed or system performance.
+## 💡 The Perfect Multi-Device Setup (The Syncthing Workflow)
+Tired of setting up your shortcuts and environment variables on every new PC? Flowy shines when combined with sync tools like **Syncthing**, Dropbox, or Google Drive. 
 
-## 💖 Tribute to Launchy
-Flowy was built out of deep nostalgia and respect for **[Launchy](https://www.launchy.net/)**, the legendary open-source keystroke launcher. Launchy pioneered the concept of a completely customizable, RAM-based user catalog where you could specify exact folders, scan depths, and file extensions. Flowy brings this exact "power user" cataloging philosophy into the modern era of Flow Launcher.
+Just sync a folder full of your portable apps, scripts, or `.lnk` shortcuts (e.g., `D:\Sync\MyApps`), point Flowy to it, and instantly have your perfectly customized launch environment mirrored across all your machines. Since Flowy supports environment variables, a path like `%UserProfile%\Desktop\Work` will dynamically work on any PC.
 
 ## ✨ Features
 
-* **Blazing Fast Search:** Keeps your entire catalog in RAM (memory) for instant, millisecond-fast fuzzy search results.
-* **Instant On:** Uses a persistent local cache (`cache.json`). Your search results are ready the millisecond you boot up Flow Launcher—no waiting for initial scans.
-* **Background Auto-Scan:** Silently updates your catalog on a customizable timer without hogging your CPU.
-* **Smart Paths:** Fully supports Windows environment variables (e.g., `%UserProfile%\Desktop` or `%AppData%`).
-* **Deep Control:** Configure the exact scan depth, target specific file extensions (e.g., `*.lnk; *.exe; *.pdf`), and toggle subfolder inclusion per directory.
-* **Clean UI:** A built-in settings panel with live statistics for tracked files and folders.
+* ⚡ **Blazing Fast Search:** Fully RAM-based catalog for instant, millisecond-fast fuzzy search results.
+* 🧠 **Instant On & Smart Scan:** Uses a persistent local cache (`cache.json`) to be ready the second you boot Flow Launcher, while silently updating your catalog in the background on a customizable timer without hogging CPU.
+* 🎯 **Deep Path & Filter Control:** * Precise search depth (e.g., `Depth: 0` to scan only the root folder, no subfolders).
+  * Exact file type targeting (e.g., `*.lnk; *.exe`).
+* 📁 **Folder-Only Mode:** Leave the file extension field blank to exclusively index directories – incredibly fast and clean.
+* 🎛️ **Clean UI:** A built-in, native settings panel with helpful tooltips, rule indexing (`#1 | ` prefixes in results), and live statistics for tracked files and folders.
+
+## ⌨️ Usage & Shortcuts
+
+Once you have added a directory in the Flowy settings, simply open Flow Launcher and start typing. 
+
+* **`Enter`**: Open the file or directory using the default Windows handler.
+* **`Ctrl + Enter`**: Open Windows Explorer, locate the file, and highlight it directly.
 
 ## 🚀 Installation
 
-1. Download the latest release `.zip`.
+### The Easy Way (via GUI)
+1. Download the latest `Flow.Launcher.Plugin.Flowy-vX.X.X.zip` file from the [Releases](../../releases) page.
+2. Open Flow Launcher.
+3. Type `pm install ` (make sure there is a space after "install").
+4. Drag & drop the downloaded `.zip` file directly into the Flow Launcher search bar and hit Enter.
+
+### The Manual Way
+1. Download the `.zip` from the [Releases](../../releases) page.
 2. Extract the folder into your Flow Launcher user plugins directory:
-   `%AppData%\FlowLauncher\app-<version>\UserData\Plugins` (or open Flow Launcher settings -> Plugins -> Plugin Directory).
+   * Standard: `%AppData%\FlowLauncher\Plugins\`
+   * Portable Mode: `<FlowLauncherFolder>\UserData\Plugins\`
 3. Restart Flow Launcher.
 
 ## ⚙️ Configuration
+Type `fs` (Flow Settings) in Flow Launcher, go to the **Plugins** tab, select **Flowy**, and start adding your custom directories. 
 
-Open the Flow Launcher settings and navigate to the **Flowy** plugin.
-
-* **Folder Path:** Click to add a directory, or double-click an existing entry to edit it manually (supports variables).
-* **Depth:** `0` scans only the root folder, `1` includes immediate subfolders, etc.
-* **File Types:** Semicolon-separated list of extensions to look for (e.g., `*.lnk; *.exe`). Use `*.*` for everything.
-* **Folders?:** Check this box if you also want directory names to appear in your search results.
-* **Auto-scan:** Set the interval (in minutes) for background rescans. Set to `0` to disable background scanning.
-
-## 🛠️ Built With
-* C# / .NET 9.0
-* WPF (Windows Presentation Foundation)
+* **Tip:** Hover over the input fields in the settings panel to see helpful tooltips on how to format paths and file extensions.
