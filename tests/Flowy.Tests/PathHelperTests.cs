@@ -57,6 +57,17 @@ namespace Flowy.Tests
         }
 
         [Theory]
+        [InlineData(@"D:\d_apps", true, @"D:\d_apps\")]
+        [InlineData(@"D:\d_apps\", true, @"D:\d_apps\")]
+        [InlineData(@"C:\", true, @"C:\")]
+        [InlineData(@"D:\Links\notepad.lnk", false, @"D:\Links\")]
+        [InlineData(@"C:\boot.ini", false, @"C:\")]
+        public void AutoCompletePath_UsesFolderWithTrailingBackslash(string path, bool isDirectory, string expected)
+        {
+            Assert.Equal(expected, PathHelper.AutoCompletePath(path, isDirectory));
+        }
+
+        [Theory]
         [InlineData(@"C:\Tools", "\"C:\\Tools\"")]
         [InlineData(@"C:\", "\"C:\\\\\"")]
         [InlineData(@"C:\My Apps\", "\"C:\\My Apps\\\\\"")]

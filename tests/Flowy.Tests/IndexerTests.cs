@@ -101,6 +101,15 @@ namespace Flowy.Tests
         }
 
         [Fact]
+        public void IsDirectory_MarksFoldersOnly()
+        {
+            var indexer = new Indexer();
+            indexer.BuildIndex(new List<CatalogDirectory> { Rule(depth: 0, folders: true) }, null);
+            Assert.True(indexer.Catalog.Single(i => i.Path.EndsWith("sub1")).IsDirectory);
+            Assert.False(indexer.Catalog.Single(i => i.Path.EndsWith("a.lnk")).IsDirectory);
+        }
+
+        [Fact]
         public void Counts_AreWrittenToRule()
         {
             var rule = Rule(depth: 1, folders: true);

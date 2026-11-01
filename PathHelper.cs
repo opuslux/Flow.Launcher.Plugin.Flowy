@@ -36,6 +36,14 @@ namespace Flow.Launcher.Plugin.Flowy
             return true;
         }
 
+        // Text für die Übernahme in die Eingabezeile: Ordner selbst bzw. Ordner der Datei, mit "\" zum Weiternavigieren
+        public static string AutoCompletePath(string path, bool isDirectory)
+        {
+            string dir = isDirectory ? path : Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(dir)) return path;
+            return dir.TrimEnd('\\') + "\\";
+        }
+
         // Ein abschließender Backslash würde sonst das schließende Anführungszeichen escapen
         public static string QuoteArg(string arg) => "\"" + (arg.EndsWith("\\") ? arg + "\\" : arg) + "\"";
     }

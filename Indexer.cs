@@ -11,6 +11,7 @@ namespace Flow.Launcher.Plugin.Flowy
     {
         public string Path { get; set; }
         public int RuleIndex { get; set; }
+        public bool IsDirectory { get; set; }
     }
 
     public class Indexer
@@ -189,7 +190,7 @@ namespace Flow.Launcher.Plugin.Flowy
                 {
                     if (config.IncludeDirectories && !IsFolderExcluded(subDir, compiledPathExclusions))
                     {
-                        results.Add(new IndexedItem { Path = subDir, RuleIndex = ruleIndex });
+                        results.Add(new IndexedItem { Path = subDir, RuleIndex = ruleIndex, IsDirectory = true });
                         folderCount++;
                     }
 

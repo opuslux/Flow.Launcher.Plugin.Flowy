@@ -241,6 +241,7 @@ namespace Flow.Launcher.Plugin.Flowy
                         SubTitle = $"{prefix}{Path.GetDirectoryName(item.Path)}",
                         IcoPath = item.Path,
                         ContextData = item.Path,
+                        AutoCompleteText = PathHelper.AutoCompletePath(item.Path, item.IsDirectory),
                         Score = matchResult.Score + UsageBoost(item.Path),
                         Action = e =>
                         {
@@ -311,7 +312,7 @@ namespace Flow.Launcher.Plugin.Flowy
                         IcoPath = full,
                         ContextData = full,
                         // Tab/Autovervollständigung: Pfad mit abschließendem Backslash einsetzen
-                        AutoCompleteText = full.TrimEnd('\\') + "\\",
+                        AutoCompleteText = PathHelper.AutoCompletePath(full, isDirectory: true),
                         // Startet-mit-Treffer vor reinen Teilstring-Treffern
                         Score = name.StartsWith(filter, StringComparison.OrdinalIgnoreCase) ? 100 : 50,
                         Action = e =>

@@ -18,7 +18,7 @@ Just sync a folder full of your portable apps, scripts, or `.lnk` shortcuts (e.g
 * 👀 **Folder Watching:** Optionally watches your catalogue folders and rescans a few seconds after files are created, deleted or renamed.
 * 🚫 **Wildcard Exclusions:** Exclusion paths support `*` and `?`, e.g. `*\node_modules` or `D:\Apps\*\Logs`.
 * 📈 **Usage Boost:** Items you launch often rank higher.
-* 🗂️ **Path Browsing:** Type a path like `c:\` or `%UserProfile%\` to list its subfolders instantly. `Tab` completes the folder, `Enter` opens it.
+* 🗂️ **Path Browsing:** Type a path like `c:\` or `%UserProfile%\` to list its subfolders instantly. `Ctrl + Tab` completes the folder, `Enter` opens it.
 
 ## ⌨️ Usage & Shortcuts
 
@@ -26,6 +26,7 @@ Once you have added a directory in the Flowy settings, simply open Flow Launcher
 
 * **`Enter`**: Open the file or directory using the default Windows handler.
 * **`Ctrl + Enter`**: Open Windows Explorer, locate the file, and highlight it directly.
+* **`Ctrl + Tab`**: Put the folder (or the file's folder) into the search bar with a trailing `\` to keep navigating. This is Flow Launcher's "Autocomplete" hotkey; you can change it under Settings → Hotkey.
 * **Context menu** (`Shift + Enter`): Show in File Explorer, copy path, open cmd or PowerShell in the folder (each also as admin), rescan catalogue.
 * **`flowy rescan`**: Rebuild the catalogue on demand.
 
