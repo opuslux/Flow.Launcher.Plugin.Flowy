@@ -4,7 +4,7 @@
   "Name": "Flowy",
   "Description": "Custom catalog indexer like Launchy.",
   "Author": "OpusLux",
-  "Version": "1.0.0",
+  "Version": "1.2.0",
   "Language": "csharp",
   "Website": "https://github.com/opuslux",
   "ExecuteFileName": "Flow.Launcher.Plugin.Flowy.dll",

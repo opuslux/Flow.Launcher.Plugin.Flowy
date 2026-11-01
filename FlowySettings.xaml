@@ -94,6 +94,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="200"/>
@@ -106,9 +107,11 @@
                 <TextBlock Grid.Row="1" Text="Autoscan interval (min):" VerticalAlignment="Center" Foreground="{DynamicResource Color05B}" Margin="0,5"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Width="80" HorizontalAlignment="Left" Text="{Binding RescanIntervalMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="30" PreviewTextInput="NumberValidationTextBox" TextChanged="IntervalTextBox_TextChanged"/>
 
-                <CheckBox Grid.Row="2" Grid.ColumnSpan="2" IsChecked="{Binding ShowRuleNumber, UpdateSourceTrigger=PropertyChanged}" Content="Show Catalogue Rule Number in results (e.g. #7 | ...)" Foreground="{DynamicResource Color05B}" Margin="0,15,0,15" Checked="UIField_Changed" Unchecked="UIField_Changed"/>
+                <CheckBox Grid.Row="2" Grid.ColumnSpan="2" IsChecked="{Binding ShowRuleNumber, UpdateSourceTrigger=PropertyChanged}" Content="Show Catalogue Rule Number in results (e.g. #7 | ...)" Foreground="{DynamicResource Color05B}" Margin="0,15,0,0" Checked="UIField_Changed" Unchecked="UIField_Changed"/>
 
-                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,10">
+                <CheckBox Grid.Row="3" Grid.ColumnSpan="2" IsChecked="{Binding WatchForChanges, UpdateSourceTrigger=PropertyChanged}" Content="Watch folders for changes (rescan automatically)" Foreground="{DynamicResource Color05B}" Margin="0,10,0,15" Checked="UIField_Changed" Unchecked="UIField_Changed" ToolTip="Rescans a few seconds after files or folders are created, deleted or renamed. The autoscan interval stays active."/>
+
+                <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,10">
                     <Button Content="📥 Import Settings" Click="Import_Click" Padding="15,5" Margin="0,0,10,0" Cursor="Hand"/>
                     <Button Content="📤 Export Settings" Click="Export_Click" Padding="15,5" Cursor="Hand"/>
                 </StackPanel>
@@ -208,7 +211,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Margin="0,0,0,15" Foreground="{DynamicResource Color05B}" TextWrapping="Wrap"
-                           Text="Tip: Leave 'Path' empty to ignore suffixes globally (e.g. *.tmp). Leave 'Suffix' empty to ignore the entire folder."/>
+                           Text="Tip: Leave 'Path' empty to ignore suffixes globally (e.g. *.tmp). Leave 'Suffix' empty to ignore the entire folder. Paths may contain wildcards: * (any characters, including \) and ? (one character), e.g. *\node_modules or D:\Apps\*\Logs."/>
 
                 <ListBox x:Name="ExclusionList"
                          Grid.Row="1"
@@ -237,7 +240,7 @@
                                             <ColumnDefinition Width="40"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBox Grid.Column="0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Path (Leave empty for global exclusion)" ToolTip="Folder to exclude. e.g. C:\Windows"/>
+                                        <TextBox Grid.Column="0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Path (Leave empty for global exclusion)" ToolTip="Folder to exclude, e.g. C:\Windows. Wildcards allowed, e.g. *\node_modules"/>
                                         <CheckBox Grid.Column="1" IsChecked="{Binding Recursive, UpdateSourceTrigger=PropertyChanged}" Content="Recursive" Foreground="{DynamicResource Color05B}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Apply to all sub-folders?"/>
                                         
                                         <TextBox Grid.Column="2" Text="{Binding SuffixesDisplay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" Style="{StaticResource PlaceholderTextBoxStyle}" Tag="Suffix (e.g. *.tmp; *.log)" ToolTip="File extensions to ignore. Leave empty to ignore entire folder."/>

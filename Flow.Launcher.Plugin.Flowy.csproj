@@ -7,10 +7,12 @@
 		<UseWPF>true</UseWPF>
 		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
 		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+		<!-- Testprojekt nicht ins Plugin kompilieren -->
+		<DefaultItemExcludes>$(DefaultItemExcludes);tests\**</DefaultItemExcludes>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Flow.Launcher.Plugin" Version="2.1.0" ExcludeAssets="runtime" />
+		<PackageReference Include="Flow.Launcher.Plugin" Version="5.0.0" ExcludeAssets="runtime" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -46,7 +48,7 @@
 		<None Include=".github\workflows\release.yml" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(GITHUB_ACTIONS)' != 'true'">
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(GITHUB_ACTIONS)' != 'true' And '$(SkipDeploy)' != 'true'">
 		<Message Importance="high" Text="Starte lokales Deployment..." />
 		<Exec Command="taskkill /f /im Flow.Launcher.exe /t || exit 0" />
 		<Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;D:\d_apps\FlowLauncher\app-2.1.1\UserData\Plugins\FlowyDev\&quot; /Y /I /E" />
