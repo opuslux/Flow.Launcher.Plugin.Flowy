@@ -12,5 +12,6 @@ namespace Flow.Launcher.Plugin.Flowy
         public int RescanIntervalMinutes { get; set; } = 30;
         public int MaxResults { get; set; } = 1000;
         public bool ShowRuleNumber { get; set; } = true;
+        public bool WatchForChanges { get; set; } = true;
     }
 }

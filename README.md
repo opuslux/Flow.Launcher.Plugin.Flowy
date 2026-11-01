@@ -15,6 +15,10 @@ Just sync a folder full of your portable apps, scripts, or `.lnk` shortcuts (e.g
   * Exact file type targeting (e.g., `*.lnk; *.exe`).
 * 📁 **Folder-Only Mode:** Leave the file extension field blank to exclusively index directories – incredibly fast and clean.
 * 🎛️ **Clean UI:** A built-in, native settings panel with helpful tooltips, rule indexing (`#1 | ` prefixes in results), and live statistics for tracked files and folders.
+* 👀 **Folder Watching:** Optionally watches your catalogue folders and rescans a few seconds after files are created, deleted or renamed.
+* 🚫 **Wildcard Exclusions:** Exclusion paths support `*` and `?`, e.g. `*\node_modules` or `D:\Apps\*\Logs`.
+* 📈 **Usage Boost:** Items you launch often rank higher.
+* 🗂️ **Path Browsing:** Type a path like `c:\` or `%UserProfile%\` to list its subfolders instantly. `Tab` completes the folder, `Enter` opens it.
 
 ## ⌨️ Usage & Shortcuts
 
@@ -22,6 +26,8 @@ Once you have added a directory in the Flowy settings, simply open Flow Launcher
 
 * **`Enter`**: Open the file or directory using the default Windows handler.
 * **`Ctrl + Enter`**: Open Windows Explorer, locate the file, and highlight it directly.
+* **Context menu** (`Shift + Enter`): Show in File Explorer, copy path, open cmd or PowerShell in the folder (each also as admin), rescan catalogue.
+* **`flowy rescan`**: Rebuild the catalogue on demand.
 
 ## 🚀 Installation
 

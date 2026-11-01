@@ -18,15 +18,23 @@ namespace Flow.Launcher.Plugin.Flowy
         private CatalogDirectory _draggedItem = null;
 
         private readonly Settings _settings;
-        private readonly Indexer _indexer;
         private readonly Main _plugin;
 
-        public FlowySettings(Settings settings, Indexer indexer, Main plugin)
+        // Debounce: mehrere schnelle Änderungen führen zu genau einem Speichervorgang
+        private readonly System.Windows.Threading.DispatcherTimer _saveTimer;
+
+        public FlowySettings(Settings settings, Main plugin)
         {
             InitializeComponent();
             _settings = settings;
-            _indexer = indexer;
             _plugin = plugin;
+
+            _saveTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            _saveTimer.Tick += (s, e) =>
+            {
+                _saveTimer.Stop();
+                _plugin.SaveSettings();
+            };
 
             DataContext = _settings;
             DirectoryList.ItemsSource = _settings.Directories;
@@ -189,9 +197,7 @@ namespace Flow.Launcher.Plugin.Flowy
                 btn.IsEnabled = false;
                 ScanProgressBar.Visibility = Visibility.Visible;
 
-                // NEU: Exclusions an Indexer übergeben
-                await Task.Run(() => _indexer.BuildIndex(_settings.Directories, _settings.Exclusions));
-                _plugin.SaveCache(); 
+                await _plugin.RunScanAsync("manual");
 
                 int totalFiles = _settings.Directories.Sum(d => d.FileCount);
                 int totalFolders = _settings.Directories.Sum(d => d.FolderCount);
@@ -384,11 +390,8 @@ namespace Flow.Launcher.Plugin.Flowy
 
         private void SaveWithDelay()
         {
-            Task.Run(async () =>
-            {
-                await Task.Delay(100);
-                _plugin.SaveSettings();
-            });
+            _saveTimer.Stop();
+            _saveTimer.Start();
         }
     }
 }
